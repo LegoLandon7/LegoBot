@@ -1,0 +1,2 @@
+# LegoBot
+discord bot
