@@ -56,7 +56,7 @@ async function getUser(msg, input) {
     if (match) return match.user;
   }
 
-  return msg.author;
+  return null;
 }
 
 // fetch member by mention, ID, or username (guild only)
@@ -95,7 +95,6 @@ client.once("clientReady", () => {
 
 // Listen for messages
 client.on("messageCreate", async (msg) => {
-  // Ignore messages from bots
   if (msg.author.bot) return;
 
   const args = msg.content.trim().split(/ +/);
@@ -112,7 +111,7 @@ client.on("messageCreate", async (msg) => {
     const embed = new EmbedBuilder()
       .setTitle("Help Menu")
       .setDescription("List of bot commands")
-      .setColor(0x00ff00) // green
+      .setColor(0x00ff00)
       .addFields(
         { name: "prefix: ", value: PREFIX },
         { name: "help", value: "Shows this menu of commands" },
@@ -124,7 +123,7 @@ client.on("messageCreate", async (msg) => {
         { name: "unban [userID] [reason]", value: "Unbans a user from the server" },
         { name: "kick [user] [reason]", value: "Kicks a user from the server" },
         { name: "timeout [user] [time] [reason]", value: "Times out a user from the server" },
-        { name: "untimeout [user] [time]", value: "Untimes out a user from the server" }
+        { name: "untimeout [user]", value: "Removes timeout from a user" }
       )
       .setFooter({ text: "This is the best bot ever made!" });
 
@@ -136,7 +135,7 @@ client.on("messageCreate", async (msg) => {
     const embed = new EmbedBuilder()
       .setTitle("LegoBot info!")
       .setDescription("This is a bot made as a side-project using nodejs")
-      .setColor(0x00ff00) // green
+      .setColor(0x00ff00)
       .addFields(
         { name: "creator: ", value: "cc_landonlego" },
         { name: "github: ", value: "[github](https://github.com/LegoLandon7/LegoBot)" }
@@ -150,19 +149,14 @@ client.on("messageCreate", async (msg) => {
   if (command === `${PREFIX}echo`) {
     let targetChannel = msg.mentions.channels.first() || msg.channel;
 
-    // check permissions
-    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMessages))
       return msg.reply("You need Manage Messages permission to use this command");
-    }
 
-    // trim the text
     const text = args.filter(arg => arg !== `<#${targetChannel.id}>`).join(" ");
     if (!text) return msg.reply("Please provide a message to send");
 
-    // check bot permissions for target channel
-    if (!targetChannel.permissionsFor(msg.guild.members.me).has(PermissionsBitField.Flags.SendMessages)) {
+    if (!targetChannel.permissionsFor(msg.guild.members.me).has(PermissionsBitField.Flags.SendMessages))
       return msg.reply("I cannot send messages in that channel");
-    }
 
     try {
       await targetChannel.send(text);
@@ -176,16 +170,14 @@ client.on("messageCreate", async (msg) => {
   // avatar command
   if (command === `${PREFIX}avatar`) {
     const user = await getUser(msg, args[0]);
+    if (!user) return msg.reply("❌ Could not find that user");
 
-    // avatar embeded
     const avatarEmbed = new EmbedBuilder()
       .setTitle(`${user.username}'s Avatar`)
       .setImage(user.displayAvatarURL({ dynamic: true, size: 1024 }))
       .setColor(0x00ff00)
       .setDescription(
-        `[PNG](${user.displayAvatarURL({ format: "png", size: 1024 })}) | 
-         [JPG](${user.displayAvatarURL({ format: "jpg", size: 1024,
-        })}) | [WEBP](${user.displayAvatarURL({ format: "webp", size: 1024 })})`
+        `[PNG](${user.displayAvatarURL({ format: "png", size: 1024 })}) | [JPG](${user.displayAvatarURL({ format: "jpg", size: 1024 })}) | [WEBP](${user.displayAvatarURL({ format: "webp", size: 1024 })})`
       );
 
     msg.reply({ embeds: [avatarEmbed] });
@@ -199,7 +191,7 @@ client.on("messageCreate", async (msg) => {
       return msg.reply("I don't have permission to ban members");
 
     const targetUser = await getUser(msg, args[0]);
-    if (!targetUser) return msg.reply("Could not find that user");
+    if (!targetUser) return msg.reply("❌ Could not find that user");
     if (targetUser.id === msg.author.id) return msg.reply("You cannot ban yourself");
 
     const member = await msg.guild.members.fetch(targetUser.id).catch(() => null);
@@ -214,7 +206,7 @@ client.on("messageCreate", async (msg) => {
       msg.reply(`Banned ${targetUser.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't ban this user");
+      msg.reply("❌ I couldn't ban this user. Make sure they exist or I have permission.");
     }
   }
 
@@ -233,14 +225,14 @@ client.on("messageCreate", async (msg) => {
     try {
       const bans = await msg.guild.bans.fetch();
       let banInfo = bans.get(input) || bans.find(b => b.user.username.toLowerCase() === input.toLowerCase());
-      if (!banInfo) return msg.reply("Could not find a banned user with that ID or username");
+      if (!banInfo) return msg.reply("❌ Could not find a banned user with that ID or username");
 
       await msg.guild.bans.remove(banInfo.user.id, reason);
       banInfo.user.send(`Hello! You have been unbanned from **${msg.guild.name}** because:\n**${reason}**`).catch(() => {});
       msg.reply(`Successfully unbanned ${banInfo.user.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't unban this user. Make sure the ID or username is correct.");
+      msg.reply("❌ I couldn't unban this user. Make sure the ID or username is correct.");
     }
   }
 
@@ -252,7 +244,7 @@ client.on("messageCreate", async (msg) => {
       return msg.reply("I don't have permission to kick members");
 
     const targetUser = await getMember(msg, args[0]);
-    if (!targetUser) return msg.reply("Could not find that user in this server");
+    if (!targetUser) return msg.reply("❌ Could not find that user in this server");
     if (targetUser.id === msg.author.id) return msg.reply("You cannot kick yourself");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
       return msg.reply("You cannot kick this member due to role hierarchy");
@@ -265,7 +257,7 @@ client.on("messageCreate", async (msg) => {
       msg.reply(`Kicked ${targetUser.user.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't kick this user");
+      msg.reply("❌ I couldn't kick this user");
     }
   }
 
@@ -277,7 +269,7 @@ client.on("messageCreate", async (msg) => {
       return msg.reply("I don't have permission to timeout members");
 
     const targetUser = await getMember(msg, args[0]);
-    if (!targetUser) return msg.reply("Could not find that user in this server");
+    if (!targetUser) return msg.reply("❌ Could not find that user in this server");
     if (targetUser.id === msg.author.id) return msg.reply("You cannot timeout yourself");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
       return msg.reply("You cannot timeout this member due to role hierarchy");
@@ -295,7 +287,7 @@ client.on("messageCreate", async (msg) => {
       msg.reply(`Timed out ${targetUser.user.tag} for ${durationArg} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't timeout this user");
+      msg.reply("❌ I couldn't timeout this user");
     }
   }
 
@@ -307,7 +299,7 @@ client.on("messageCreate", async (msg) => {
       return msg.reply("I don't have permission to remove timeouts");
 
     const targetUser = await getMember(msg, args[0]);
-    if (!targetUser) return msg.reply("Could not find that user in this server");
+    if (!targetUser) return msg.reply("❌ Could not find that user in this server");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
       return msg.reply("You cannot remove timeout for this member due to role hierarchy");
 
@@ -317,7 +309,7 @@ client.on("messageCreate", async (msg) => {
       msg.reply(`Removed timeout for ${targetUser.user.tag}`);
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't remove timeout for this user");
+      msg.reply("❌ I couldn't remove timeout for this user");
     }
   }
 });
