@@ -7,8 +7,8 @@ dotenv.config();
 // Create a new bot client
 const client = new Client({
   intents: [
-    GatewayIntentBits.Guilds, 
-    GatewayIntentBits.GuildMessages, 
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.GuildMembers,
   ],
@@ -37,21 +37,18 @@ function parseDuration(duration) {
 async function getUser(msg, input) {
   if (!input) return msg.author;
 
-  // Mention
   const mention = msg.mentions.users.first();
   if (mention) return mention;
 
-  // ID
   if (/^\d+$/.test(input)) {
     const user = await msg.client.users.fetch(input).catch(() => null);
     if (user) return user;
   }
 
-  // Search from guild members
   const members = await msg.guild.members.fetch({ query: input, limit: 50 }).catch(() => null);
   if (members && members.size > 0) {
     const match = members.find(
-      (m) => m.user.username.toLowerCase() === input.toLowerCase() || m.nickname?.toLowerCase() === input.toLowerCase()
+      m => m.user.username.toLowerCase() === input.toLowerCase() || m.nickname?.toLowerCase() === input.toLowerCase()
     );
     if (match) return match.user;
   }
@@ -63,17 +60,14 @@ async function getUser(msg, input) {
 async function getMember(msg, input) {
   if (!input) return null;
 
-  // 1. Mention
   const mention = msg.mentions.members.first();
   if (mention) return mention;
 
-  // 2. ID
   if (/^\d+$/.test(input)) {
     const memberById = await msg.guild.members.fetch(input).catch(() => null);
     if (memberById) return memberById;
   }
 
-  // 3. Fetch by username or nickname
   const fetched = await msg.guild.members.fetch({ query: input, limit: 50 }).catch(() => null);
   if (fetched && fetched.size > 0) {
     const exact = fetched.find(m => m.user.username.toLowerCase() === input.toLowerCase());
@@ -103,7 +97,7 @@ client.on("messageCreate", async (msg) => {
   // ping command
   if (command === `${PREFIX}ping`) {
     const latency = Date.now() - msg.createdTimestamp;
-    msg.reply(`Ping: **${latency}ms**`);
+    msg.reply(`✅ Ping: **${latency}ms**`);
   }
 
   // help command
@@ -119,6 +113,7 @@ client.on("messageCreate", async (msg) => {
         { name: "ping", value: "Gets the ping of the bot" },
         { name: "echo [channel] [message]", value: "Sends a message in a channel" },
         { name: "avatar [user]", value: "Gets the avatar of a user" },
+        { name: "setnick [user] [value]", value: "Sets the nickname of a user" },
         { name: "ban [user] [reason]", value: "Bans a user from the server" },
         { name: "unban [userID] [reason]", value: "Unbans a user from the server" },
         { name: "kick [user] [reason]", value: "Kicks a user from the server" },
@@ -145,25 +140,52 @@ client.on("messageCreate", async (msg) => {
     msg.reply({ embeds: [embed] });
   }
 
+  // setnick command
+  if (command === `${PREFIX}setnick`) {
+    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageNicknames))
+      return msg.reply("❌ You don't have permission to change nicknames");
+    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageNicknames))
+      return msg.reply("❌ I don't have permission to change nicknames");
+
+    const targetUser = await getMember(msg, args[0]);
+    if (!targetUser) return msg.reply("❌ Couldn't find that user");
+
+    const newNick = args.slice(1).join(" ");
+
+    try {
+      if (!newNick) {
+        await targetUser.setNickname(null);
+        msg.reply(`✅ Reset nickname for ${targetUser.user.username} to default`);
+      } else {
+        await targetUser.setNickname(newNick);
+        msg.reply(`✅ Changed nickname for ${targetUser.user.username} to **${newNick}**`);
+      }
+    } catch (err) {
+      console.error(err);
+      msg.reply("❌ I couldn't change that user's nickname.");
+    }
+  }
+
   // echo command
   if (command === `${PREFIX}echo`) {
     let targetChannel = msg.mentions.channels.first() || msg.channel;
 
     if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMessages))
-      return msg.reply("You need Manage Messages permission to use this command");
+      return msg.reply("❌ You need Manage Messages permission to use this command");
 
     const text = args.filter(arg => arg !== `<#${targetChannel.id}>`).join(" ");
-    if (!text) return msg.reply("Please provide a message to send");
+    if (!text) return msg.reply("❌ Please provide a message to send");
 
     if (!targetChannel.permissionsFor(msg.guild.members.me).has(PermissionsBitField.Flags.SendMessages))
-      return msg.reply("I cannot send messages in that channel");
+      return msg.reply("❌ I cannot send messages in that channel");
 
     try {
       await targetChannel.send(text);
       await msg.delete();
+      msg.reply("✅ Message sent successfully");
     } catch (err) {
       console.error(err);
-      msg.reply("I couldn't send the message");
+      msg.reply("❌ I couldn't send the message");
     }
   }
 
@@ -186,24 +208,24 @@ client.on("messageCreate", async (msg) => {
   // ban command
   if (command === `${PREFIX}ban`) {
     if (!msg.member.permissions.has(PermissionsBitField.Flags.BanMembers))
-      return msg.reply("You don't have permission to ban members");
+      return msg.reply("❌ You don't have permission to ban members");
     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers))
-      return msg.reply("I don't have permission to ban members");
+      return msg.reply("❌ I don't have permission to ban members");
 
     const targetUser = await getUser(msg, args[0]);
     if (!targetUser) return msg.reply("❌ Could not find that user");
-    if (targetUser.id === msg.author.id) return msg.reply("You cannot ban yourself");
+    if (targetUser.id === msg.author.id) return msg.reply("❌ You cannot ban yourself");
 
     const member = await msg.guild.members.fetch(targetUser.id).catch(() => null);
     if (member && member.roles.highest.position >= msg.member.roles.highest.position)
-      return msg.reply("You cannot ban this member due to role hierarchy");
+      return msg.reply("❌ You cannot ban this member due to role hierarchy");
 
     const reason = args.slice(1).join(" ") || "No reason provided";
 
     try {
       await targetUser.send(`Hello! You have been banned from **${msg.guild.name}** because:\n**${reason}**`).catch(() => {});
       await msg.guild.bans.create(targetUser.id, { reason });
-      msg.reply(`Banned ${targetUser.tag} | Reason: ${reason}`);
+      msg.reply(`✅ Banned ${targetUser.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
       msg.reply("❌ I couldn't ban this user. Make sure they exist or I have permission.");
@@ -213,12 +235,12 @@ client.on("messageCreate", async (msg) => {
   // unban command
   if (command === `${PREFIX}unban`) {
     if (!msg.member.permissions.has(PermissionsBitField.Flags.BanMembers))
-      return msg.reply("You don't have permission to unban members");
+      return msg.reply("❌ You don't have permission to unban members");
     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers))
-      return msg.reply("I don't have permission to unban members");
+      return msg.reply("❌ I don't have permission to unban members");
 
     const input = args[0];
-    if (!input) return msg.reply("Please provide the ID or username of the user to unban");
+    if (!input) return msg.reply("❌ Please provide the ID or username of the user to unban");
 
     const reason = args.slice(1).join(" ") || "No reason provided";
 
@@ -229,7 +251,7 @@ client.on("messageCreate", async (msg) => {
 
       await msg.guild.bans.remove(banInfo.user.id, reason);
       banInfo.user.send(`Hello! You have been unbanned from **${msg.guild.name}** because:\n**${reason}**`).catch(() => {});
-      msg.reply(`Successfully unbanned ${banInfo.user.tag} | Reason: ${reason}`);
+      msg.reply(`✅ Successfully unbanned ${banInfo.user.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
       msg.reply("❌ I couldn't unban this user. Make sure the ID or username is correct.");
@@ -239,22 +261,22 @@ client.on("messageCreate", async (msg) => {
   // kick command
   if (command === `${PREFIX}kick`) {
     if (!msg.member.permissions.has(PermissionsBitField.Flags.KickMembers))
-      return msg.reply("You don't have permission to kick members");
+      return msg.reply("❌ You don't have permission to kick members");
     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.KickMembers))
-      return msg.reply("I don't have permission to kick members");
+      return msg.reply("❌ I don't have permission to kick members");
 
     const targetUser = await getMember(msg, args[0]);
     if (!targetUser) return msg.reply("❌ Could not find that user in this server");
-    if (targetUser.id === msg.author.id) return msg.reply("You cannot kick yourself");
+    if (targetUser.id === msg.author.id) return msg.reply("❌ You cannot kick yourself");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
-      return msg.reply("You cannot kick this member due to role hierarchy");
+      return msg.reply("❌ You cannot kick this member due to role hierarchy");
 
     const reason = args.slice(1).join(" ") || "No reason provided";
 
     try {
       await targetUser.send(`Hello! You have been kicked from **${msg.guild.name}** because:\n**${reason}**`).catch(() => {});
       await targetUser.kick({ reason });
-      msg.reply(`Kicked ${targetUser.user.tag} | Reason: ${reason}`);
+      msg.reply(`✅ Kicked ${targetUser.user.tag} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
       msg.reply("❌ I couldn't kick this user");
@@ -264,27 +286,27 @@ client.on("messageCreate", async (msg) => {
   // timeout command
   if (command === `${PREFIX}timeout`) {
     if (!msg.member.permissions.has(PermissionsBitField.Flags.ModerateMembers))
-      return msg.reply("You don't have permission to timeout members");
+      return msg.reply("❌ You don't have permission to timeout members");
     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ModerateMembers))
-      return msg.reply("I don't have permission to timeout members");
+      return msg.reply("❌ I don't have permission to timeout members");
 
     const targetUser = await getMember(msg, args[0]);
     if (!targetUser) return msg.reply("❌ Could not find that user in this server");
-    if (targetUser.id === msg.author.id) return msg.reply("You cannot timeout yourself");
+    if (targetUser.id === msg.author.id) return msg.reply("❌ You cannot timeout yourself");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
-      return msg.reply("You cannot timeout this member due to role hierarchy");
+      return msg.reply("❌ You cannot timeout this member due to role hierarchy");
 
     const durationArg = args[1];
-    if (!durationArg) return msg.reply("Please provide a duration (e.g., 10m, 2h, 1d)");
+    if (!durationArg) return msg.reply("❌ Please provide a duration (e.g., 10m, 2h, 1d)");
 
     const reason = args.slice(2).join(" ") || "No reason provided";
     const ms = parseDuration(durationArg);
-    if (!ms) return msg.reply("Invalid duration. Use formats like 10m, 2h, 1d");
+    if (!ms) return msg.reply("❌ Invalid duration. Use formats like 10m, 2h, 1d");
 
     try {
       await targetUser.timeout(ms, reason);
       await targetUser.send(`You have been timed out in **${msg.guild.name}** for ${durationArg} because:\n**${reason}**`).catch(() => {});
-      msg.reply(`Timed out ${targetUser.user.tag} for ${durationArg} | Reason: ${reason}`);
+      msg.reply(`✅ Timed out ${targetUser.user.tag} for ${durationArg} | Reason: ${reason}`);
     } catch (err) {
       console.error(err);
       msg.reply("❌ I couldn't timeout this user");
@@ -294,19 +316,19 @@ client.on("messageCreate", async (msg) => {
   // untimeout command
   if (command === `${PREFIX}untimeout`) {
     if (!msg.member.permissions.has(PermissionsBitField.Flags.ModerateMembers))
-      return msg.reply("You don't have permission to remove timeouts");
+      return msg.reply("❌ You don't have permission to remove timeouts");
     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ModerateMembers))
-      return msg.reply("I don't have permission to remove timeouts");
+      return msg.reply("❌ I don't have permission to remove timeouts");
 
     const targetUser = await getMember(msg, args[0]);
     if (!targetUser) return msg.reply("❌ Could not find that user in this server");
     if (targetUser.roles.highest.position >= msg.member.roles.highest.position)
-      return msg.reply("You cannot remove timeout for this member due to role hierarchy");
+      return msg.reply("❌ You cannot remove timeout for this member due to role hierarchy");
 
     try {
       await targetUser.timeout(null, "Timeout removed by moderator");
       await targetUser.send(`Your timeout has been removed in **${msg.guild.name}**`).catch(() => {});
-      msg.reply(`Removed timeout for ${targetUser.user.tag}`);
+      msg.reply(`✅ Removed timeout for ${targetUser.user.tag}`);
     } catch (err) {
       console.error(err);
       msg.reply("❌ I couldn't remove timeout for this user");
