@@ -568,14 +568,14 @@ export function doCommands(client) {
                 try {
                     // check permissions
                     if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMessages))
-                        return msg.reply("❌ You don't have permission to delete messages.");
+                        return msg.reply("❌ You don't have permission to delete messages");
                     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMessages))
-                        return msg.reply("❌ I don't have permission to delete messages.");
+                        return msg.reply("❌ I don't have permission to delete messages");
 
                     // get amount
                     const amount = parseInt(args[0]);
                     if (isNaN(amount) || amount < 1 || amount > 100)
-                        return msg.reply("❌ Please provide a number between **1** and **100**.");
+                        return msg.reply("❌ Please provide a number between **1** and **100**");
 
                     // delete messages
                     await msg.channel.bulkDelete(amount, true).then(deleted => {
@@ -583,17 +583,17 @@ export function doCommands(client) {
                         .then(m => setTimeout(() => m.delete().catch(() => {}), 5000)); // auto-delete reply after 5s
                     }).catch(err => {
                         console.error("Failed to purge:", err);
-                        msg.reply("❌ I couldn't delete messages. Make sure they aren't too old (14 days max).");
+                        msg.reply("❌ I couldn't delete messages. Make sure they aren't too old (14 days max)");
                     });
                 } catch (err) {
                     console.error("Error in purge command:", err);
-                    msg.reply("❌ Something went wrong while trying to delete messages.");
+                    msg.reply("❌ Something went wrong while trying to delete messages");
                 }
             }
 
         }catch(err){ // global error (error used for things that shouldn't have errors but they might)
             console.error(err);
-            msg.reply("❌ Something went wrong while processing your command.").catch(() => {});
+            msg.reply("❌ Something went wrong while processing your command").catch(() => {});
         }
     });
 }
