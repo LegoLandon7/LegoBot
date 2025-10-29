@@ -1,5 +1,6 @@
 // convert duration strings
 export function parseDuration(duration) {
+    if (!duration || typeof duration !== "string") return null;
 	const match = duration.match(/^(\d+)(s|m|h|d)$/);
 	if (!match) return null;
 	const amount = parseInt(match[1]);

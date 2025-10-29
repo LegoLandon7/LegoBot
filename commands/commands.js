@@ -1,5 +1,7 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { parseDuration,  fetchMember} from "../functions/utilities.js";
+import { getLogChannel, setLogChannel } from "../logging/save-log-channels.js";
+import { doLogging } from "../logging/logger.js";
 
 const PREFIX = "$";
 const EMBED_COLOR = "#676767";
@@ -374,6 +376,7 @@ export function doCommands(client) {
             if (!member) return msg.reply("❌ Could not find that user");
 
             // check if they are bannable
+            if (member.user.bot) return msg.reply("❌ Cant ban out a bot");
             if (member.id === msg.author.id) return msg.reply(`❌ You cannot ban yourself`);
             if (member.roles.highest.position >= msg.member.roles.highest.position) return msg.reply(`❌ You cannot ban this member due to role hierarchy`);
 
@@ -395,6 +398,7 @@ export function doCommands(client) {
             if (!member) return msg.reply("❌ Could not find that user");
 
             // check if they are kickable
+            if (member.user.bot) return msg.reply("❌ Cant kick out a bot");
             if (member.id === msg.author.id) return msg.reply(`❌ You cannot kick yourself`);
             if (member.roles.highest.position >= msg.member.roles.highest.position) return msg.reply(`❌ You cannot kick this member due to role hierarchy`);
 
@@ -416,6 +420,9 @@ export function doCommands(client) {
             if (!member) return msg.reply("❌ Could not find that user");
 
             // check if they are able to be timed out
+            if (member.communicationDisabledUntilTimestamp && member.communicationDisabledUntilTimestamp > Date.now()) {
+                return msg.reply("❌ This user is already timed out");}
+            if (member.user.bot) return msg.reply("❌ Cant time out a bot");
             if (member.id === msg.author.id) return msg.reply(`❌ You cannot timeout yourself`);
             if (member.roles.highest.position >= msg.member.roles.highest.position) return msg.reply(`❌ You cannot timeout this member due to role hierarchy`);
 
@@ -429,7 +436,7 @@ export function doCommands(client) {
 
             await member.send(`You have been timed out from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
             await member.timeout(duration, reason);
-            msg.reply(`✅ Timed out ${member.user.tag} | Reason: ${reason}`);
+            msg.reply(`✅ Timed out ${member} | Reason: ${reason}`);
         }
 
         //-----------------untimeout----------------
@@ -439,6 +446,9 @@ export function doCommands(client) {
             if (!member) return msg.reply("❌ Could not find that user");
 
             // check if they are able to be untimed out
+            if (!member.communicationDisabledUntilTimestamp || member.communicationDisabledUntilTimestamp <= Date.now()) {
+                return msg.reply("❌ This user is not currently timed out");}
+            if (member.user.bot) return msg.reply("❌ Cant untime out a bot");
             if (member.id === msg.author.id) return msg.reply(`❌ You cannot untimeout yourself`);
             if (member.roles.highest.position >= msg.member.roles.highest.position) return msg.reply(`❌ You cannot untimeout this member due to role hierarchy`);
 
@@ -449,7 +459,7 @@ export function doCommands(client) {
             // untimeout
             await member.send(`You have been untimed out from **${msg.guild.name}**`).catch(() => {});
             await member.timeout(null, "Timeout removed by moderator");
-            msg.reply(`✅ Untimed out ${member.user.tag}`);
+            msg.reply(`✅ Untimed out ${member}`);
         }
 
         //-----------------setnick----------------
