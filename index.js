@@ -35,7 +35,12 @@ client.once("clientReady", () => {
 doLogging(client);
 
 // commands
-doCommands(client);
+try {doCommands(client);}
+catch(err) {
+	console.error(err);
+	
+}
+
 
 // login
 client.login(process.env.TOKEN);
