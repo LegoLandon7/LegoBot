@@ -37,5 +37,5 @@ doLogging(client);
 // commands
 doCommands(client);
 
-//-----------------login----------------
+// login
 client.login(process.env.TOKEN);

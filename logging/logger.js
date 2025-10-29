@@ -27,10 +27,8 @@ export function doLogging(client, args = null) {
 
         let msg = message;
         if (message.partial) {try {
-                msg = await message.fetch();
-            } catch {
-                return; // skip
-            }
+            msg = await message.fetch();
+        } catch { return; }
         }
 
         // embed builder

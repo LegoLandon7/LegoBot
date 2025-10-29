@@ -54,7 +54,8 @@ export function doCommands(client) {
                 { name: "info", value: "Shows info about the bot" },
                 { name: "ping", value: "Gets the ping of the bot" }
             )
-            .setFooter({ text: EMBED_DESC });
+            .setFooter({ text: EMBED_DESC })
+            .setTimestamp();
 
         // page2
         const page2 = new EmbedBuilder()
