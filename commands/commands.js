@@ -363,7 +363,7 @@ export function doCommands(client) {
                     .setDescription("This is a bot made as a side-project using Node.js")
                     .setColor(EMBED_COLOR)
                     .addFields(
-                        { name: "Creator", value: "cc_landonlego", inline: true },
+                        { name: "Creator", value: "cc_landonlego", inline: false },
                         { name: "GitHub", value: "[github](https://github.com/LegoLandon7/LegoBot)", inline: true },
                         { name: "Invite Link", value: "[invite bot](https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands)", inline: true }
                     )
