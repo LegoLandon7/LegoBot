@@ -435,7 +435,7 @@ export function doCommands(client) {
             let duration = parseDuration(args[1]); if (!duration) return msg.reply("❌ Invalid duration. Use formats like 10m, 2h, 1d");
             let reason = args.slice(2).join(" ") || "No reason provided";
 
-            await member.send(`You have been timed out from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
+            await member.send(`You have been timed out from **${msg.guild.name}** \nbecause:**${reason}**\n time: **${Math.floor(duration / 1000)}s**`).catch(() => {});
             await member.timeout(duration, reason);
             msg.reply(`✅ Timed out ${member} | Reason: ${reason}`);
         }

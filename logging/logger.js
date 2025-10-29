@@ -196,7 +196,7 @@ export function doLogging(client, args = null) {
                 .setColor(BAD_COLOR)
                 .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
                 .addFields(
-                    { name: "User", value: `${newMember})`, inline: false },
+                    { name: "User", value: `${newMember}`, inline: false },
                     { name: "Until", value: `<t:${Math.floor(newTimeout / 1000)}:F>` },
                 )
                 .setFooter({text: newMember.user.id})
