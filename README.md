@@ -1,6 +1,8 @@
 # LegoBot
 this bot is made by me (cc_landonlego) however ive used chatgpt for a lot of help on this mainly as a learning tool
 
+Add the bot! -> https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands
+
 chatgpt as a learning tool has helped me understand many concepts of making a discord bot and im starting to use less and less of it as I go on, this is one of the first big projects ive done
 
 to clone this bot, make sure to add an .env file with inside being
