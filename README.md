@@ -1,5 +1,6 @@
 # LegoBot
-this bot is made by me (cc_landonlego) however ive used chatgpt for a lot of help on this mainly as a learning tool
+-- INFO --
+this bot is made by me 'cc_landonlego' however ive used chatgpt for a lot of help on this mainly as a learning tool
 
 Add the bot! -> https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands
 
@@ -15,5 +16,6 @@ afterwards just do 'node index.js' in the terminal to start it, then do 'ctrl c'
 
 keep in mind any changes done will require you to restart the bot
 
+-- HELP --
 
-feel free to dm me 'cc_landonlego' on discord (or friend me) if you have any questions!
+if you need any help or have questions then feel free to dm me 'cc_landonlego' on discord (or friend me)!
