@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { parseDuration,  fetchMember} from "../functions/utilities.js";
-import { getLogChannel, setLogChannel } from "../logging/save-log-channels.js";
+import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../logging/save-log-channels.js";
 import { doLogging } from "../logging/logger.js";
 
 const PREFIX = "$";
@@ -104,7 +104,9 @@ export function doCommands(client) {
                 .setColor(EMBED_COLOR)
                 .addFields(
                     { name: "setlog [channel]", value: "sets, removes, or changes log channel" },
-                    { name: "logchannel", value: "gets current log channel" }
+                    { name: "logchannel", value: "gets current log channel" },
+                    { name: "setwelcome [channel]", value: "sets, removes, or changes welcome channel" },
+                    { name: "welcomechannel", value: "gets current welcome channel" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
@@ -208,7 +210,7 @@ export function doCommands(client) {
 
                 // get the saved channel ID
                 const channelId = getLogChannel(msg.guild.id);
-                if (!channelId) return msg.reply("❌ No log channel set. Use `$setlog [channe]` to set one.");
+                if (!channelId) return msg.reply("❌ No log channel set. Use `$setlog [channel]` to set one.");
 
                 // try cache first
                 let channel = msg.guild.channels.cache.get(channelId);
@@ -224,6 +226,84 @@ export function doCommands(client) {
 
                 // message
                 msg.reply(`✅ The current log channel for this server is ${channel}`);
+            }
+
+            //-----------------setwelcome----------------
+            if (command === `${PREFIX}setwelcome`) {
+                // permissions
+                if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
+                    return msg.reply("❌ You don't have permissions to manage guild");
+
+                let targetChannel;
+                if (args.length === 0) {
+                    // default to current channel
+                    targetChannel = msg.channel;
+                } else {
+                    // get channel
+                    targetChannel = msg.mentions.channels.first() || msg.guild.channels.cache.get(args[0]);
+
+                    // invalid
+                    if (!targetChannel) return msg.reply("❌ Invalid channel. Please mention a channel or provide a valid channel ID.");
+                }
+
+                // get old channel
+                const oldChannelId = getWelcomeChannel(msg.guild.id);
+                const oldChannel = oldChannelId ? msg.guild.channels.cache.get(oldChannelId) : null;
+
+                // logic
+                if (oldChannelId === targetChannel.id) {
+                    // same channel = remove it
+                    setWelcomeChannel(msg.guild.id, null);
+
+                    const embed = new EmbedBuilder()
+                        .setTitle("🗑️ Welcome Channel Removed")
+                        .setDescription(`Removed ${targetChannel} as the welcome channel.`)
+                        .setColor(0xff0000)
+                        .setFooter({ text: "Use $setwelcome again to set a new channel." });
+
+                    return msg.reply({ embeds: [embed] });
+                }
+
+                // set new log channel
+                setWelcomeChannel(msg.guild.id, targetChannel.id);
+
+                // message
+                const embed = new EmbedBuilder()
+                    .setTitle("✅ Welcome Channel Set")
+                    .setDescription(
+                        oldChannel
+                            ? `Replaced ${oldChannel} with ${targetChannel} as the new welcome channel.`
+                            : `Welcome messages will now be sent to ${targetChannel}`
+                    )
+                    .setColor(0x00ff00)
+                    .setFooter({ text: "Use $setwelcome again to change or remove it." });
+
+                msg.reply({ embeds: [embed] });
+            }
+
+            //-----------------welcomechannel----------------
+            if (command === `${PREFIX}welcomechannel`) {
+                // permissions
+                if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return msg.reply("❌ You don't have permissions to manage guild");
+
+                // get the saved channel ID
+                const channelId = getWelcomeChannel(msg.guild.id);
+                if (!channelId) return msg.reply("❌ No welcome channel set. Use `$setwelcome [channel]` to set one.");
+
+                // try cache first
+                let channel = msg.guild.channels.cache.get(channelId);
+
+                // fetch from Discord if not in cache
+                if (!channel) {
+                    try {
+                        channel = await msg.guild.channels.fetch(channelId);
+                    } catch {
+                        return msg.reply("❌ The saved welcome channel does not exist anymore.");
+                    }
+                }
+
+                // message
+                msg.reply(`✅ The current welcome channel for this server is ${channel}`);
             }
 
             //-----------------echo----------------

@@ -20,6 +20,21 @@ function logMessage(guild, content) {
     }
 }
 
+function welcomeMessage(guild, content) {
+    const channelId = getwelcomeChannel(guild.id);
+    if (!channelId) return; // no welcome channel set
+
+    const channel = guild.channels.cache.get(channelId);
+    if (!channel) return; // channel not found
+
+    // log
+    if (content instanceof EmbedBuilder) { // embed
+        channel.send({ embeds: [content] }).catch(() => {});
+    } else { // plain text
+        channel.send(content).catch(() => {});
+    }
+}
+
 export function doLogging(client, args = null) {
     try {
         // delete message
@@ -219,6 +234,72 @@ export function doLogging(client, args = null) {
 
                 logMessage(newMember.guild, embed);
             }
+        });
+
+        // user join
+        client.on("guildMemberAdd", member => {
+            // log
+            const log = new EmbedBuilder()
+                .setTitle("✅ User Joined")
+                .setColor(GOOD_COLOR)
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields(
+                    { name: "User", value: `${member}`},
+                    { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>`},
+                    { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`},
+                )
+                .setFooter({ text: member.user.id })
+                .setTimestamp();
+
+            logMessage(member.guild, log);
+
+            // welcome
+            const welcome = new EmbedBuilder()
+                .setTitle("✅ User Joined")
+                .setColor(GOOD_COLOR)
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields(
+                    { name: "User", value: `${member}`},
+                    { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`},
+                )
+                .setTimestamp();
+
+            welcomeMessage(member.guild, welcome);
+        });
+
+        // user leave
+        client.on("guildMemberRemove", member => {
+            // log
+            const log = new EmbedBuilder()
+                .setTitle("❌ User Left")
+                .setColor(BAD_COLOR)
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields(
+                    { name: "User", value: `${member}`},
+                    { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>`},
+                    { name: "Joined Server", value: member.joinedTimestamp 
+                        ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` 
+                        : "Unknown"},
+                )
+                .setFooter({ text: member.user.id })
+                .setTimestamp();
+
+            logMessage(member.guild, log);
+
+            // welcome
+            const welcome = new EmbedBuilder()
+                .setTitle("❌ User Left")
+                .setColor(BAD_COLOR)
+                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields(
+                    { name: "User", value: `${member}`},
+                    { name: "Joined Server", value: member.joinedTimestamp 
+                        ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` 
+                        : "Unknown"},
+                )
+                .setTimestamp();
+
+            welcomeMessage(member.guild, welcome);
         });
     }catch(err){
         console.error(err);

@@ -1,3 +1,4 @@
 node_modules
 .env
 logging/log-channels.json
+logging/welcome-channels.json
