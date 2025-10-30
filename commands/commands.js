@@ -732,7 +732,7 @@ export function doCommands(client) {
                                     msg.reply("❌ Failed to add the role. Check my permissions and role hierarchy.");
                             }
                     }
-            }
+            }3
 
             //-----------------purge----------------
             if (command === `${PREFIX}purge`) {
