@@ -139,9 +139,9 @@ export function doLogging(client, args = null) {
                 const embed = new EmbedBuilder()
                     .setTitle("🖼️ Avatar Updated")
                     .setColor(MEDIUM_COLOR)
-                    .setDescription(`${newUser} changed their avatar`)
-                    //.addFields({name: "\u200B", value: `${newUser}`})
-                    .setImage(newUser.displayAvatarURL({ dynamic: true, size: 128 }))
+                    .setDescription(`${newUser.tag} has updated their avatar`)
+                    .setThumbnail(newUser.displayAvatarURL({ dynamic: true, size: 256}))
+                    .addFields({name: "\u200B", value: `${newUser}`, inline: true})
                     .setFooter({ text: newUser.id })
                     .setTimestamp();
 
