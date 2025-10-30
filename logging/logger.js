@@ -140,7 +140,7 @@ export function doLogging(client, args = null) {
                     .setTitle("🖼️ Avatar Updated")
                     .setColor(MEDIUM_COLOR)
                     .setDescription(`${newUser} changed their avatar`)
-                    .addFields({name: "\u200B", value: `${newUser}`})
+                    //.addFields({name: "\u200B", value: `${newUser}`})
                     .setImage(newUser.displayAvatarURL({ dynamic: true, size: 128 }))
                     .setFooter({ text: newUser.id })
                     .setTimestamp();
