@@ -81,7 +81,7 @@ export function doCommands(client) {
                     { name: "ban [user] [reason]", value: "Bans a user" },
                     { name: "kick [user] [reason]", value: "Kicks a user" },
                     { name: "timeout [user] [duration] [reason]", value: "Timeouts a user" },
-                    { name: "un-timeout [user]", value: "Removes timeout from a user" }
+                    { name: "untimeout [user]", value: "Removes timeout from a user" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
@@ -614,8 +614,8 @@ export function doCommands(client) {
                 msg.reply(`✅ Timed out ${member} | Reason: ${reason}`);
             }
 
-            //-----------------un-timeout----------------
-            if (command === `${PREFIX}un-timeout`) {
+            //-----------------untimeout----------------
+            if (command === `${PREFIX}untimeout`) {
                 // get member info
                 const member = await fetchMember(msg, args[0]?.trim() || null);
                 if (!member) return msg.reply("❌ Could not find that user");
