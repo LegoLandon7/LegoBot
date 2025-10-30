@@ -1,4 +1,4 @@
-import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
+import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder, Partials } from "discord.js";
 import { parseDuration,  fetchMember} from "./functions/utilities.js";
 import { doLogging } from "./logging/logger.js";
 import { setLogChannel, getLogChannel } from "./logging/save-log-channels.js";
@@ -9,12 +9,16 @@ dotenv.config();
 
 // client
 const client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers,
-	],
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.GuildPresences,
+    ],
+    partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
 // error
@@ -29,13 +33,12 @@ client.once("clientReady", () => {
 		status: "online",
 		activities: [{ name: "$help for commands", type: 0 }]
 	});
+	// logging
+	doLogging(client);
+
+	// commands
+	doCommands(client);
 });
-
-// logging
-doLogging(client);
-
-// commands
-doCommands(client);
 
 // login
 client.login(process.env.TOKEN);

@@ -1,40 +1,29 @@
 import { EmbedBuilder } from "discord.js";
-import { getLogChannel } from "./save-log-channels.js";
+import { getLogChannel, getWelcomeChannel} from "./save-log-channels.js";
 
 const BAD_COLOR = "#ff0000"
 const MEDIUM_COLOR = "#ffff00"
 const GOOD_COLOR = "#00ff00"
 
+// logging
+function sendToChannel(getFn, guild, content) {
+    const id = getFn(guild.id);
+    if (!id) return;
+    const channel = guild.channels.cache.get(id);
+    if (!channel) return;
+    const payload = content instanceof EmbedBuilder ? { embeds: [content] } : content;
+    channel.send(payload).catch(() => {});
+}
+
 function logMessage(guild, content) {
-    const channelId = getLogChannel(guild.id);
-    if (!channelId) return; // no log channel set
-
-    const channel = guild.channels.cache.get(channelId);
-    if (!channel) return; // channel not found
-
-    // log
-    if (content instanceof EmbedBuilder) { // embed
-        channel.send({ embeds: [content] }).catch(() => {});
-    } else { // plain text
-        channel.send(content).catch(() => {});
-    }
+    sendToChannel(getLogChannel, guild, content);
 }
 
 function welcomeMessage(guild, content) {
-    const channelId = getwelcomeChannel(guild.id);
-    if (!channelId) return; // no welcome channel set
-
-    const channel = guild.channels.cache.get(channelId);
-    if (!channel) return; // channel not found
-
-    // log
-    if (content instanceof EmbedBuilder) { // embed
-        channel.send({ embeds: [content] }).catch(() => {});
-    } else { // plain text
-        channel.send(content).catch(() => {});
-    }
+    sendToChannel(getWelcomeChannel, guild, content);
 }
 
+// main
 export function doLogging(client, args = null) {
     try {
         // delete message
@@ -101,7 +90,7 @@ export function doLogging(client, args = null) {
                     .setColor(MEDIUM_COLOR)
                     .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
-                        { name: "User", value: newMember.user.tag},
+                        { name: "User", value: `${newMember}`},
                         { name: "Old Nickname", value: `${oldMember.nickname}` || "[None]"},
                         { name: "New Nickname", value: `${newMember.nickname}` || "[None]"} 
                     )
@@ -124,7 +113,7 @@ export function doLogging(client, args = null) {
                         .setColor(MEDIUM_COLOR)
                         .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
                         .addFields(
-                            { name: "User", value: `<@${newMember.id}>`, inline: false }, // mention user
+                            { name: "User", value: `<@${newMember}>`, inline: false },
                             { name: "Added Roles", value: added.size ? added.map(r => `<@&${r.id}>`).join(" ") : "[None]", inline: false }, // mention roles
                             { name: "Removed Roles", value: removed.size ? removed.map(r => `<@&${r.id}>`).join(" ") : "[None]", inline: false } // mention roles
                         )
@@ -134,6 +123,30 @@ export function doLogging(client, args = null) {
                     // log
                     logMessage(newMember.guild, embed);
                 }
+            }
+        });
+
+        // user avatar update
+        client.on("userUpdate", async (oldUser, newUser) => {
+            // ignore
+            if (oldUser.avatar === newUser.avatar) return;
+
+            // mutual guilds
+            for (const [guildId, guild] of client.guilds.cache) {
+                const member = guild.members.cache.get(newUser.id);
+                if (!member) continue; // not in this guild
+
+                const embed = new EmbedBuilder()
+                    .setTitle("🖼️ Avatar Updated")
+                    .setColor(MEDIUM_COLOR)
+                    .setDescription(`${newUser} changed their avatar`)
+                    .addFields({name: "\u200B", value: `${newUser}`})
+                    .setImage(newUser.displayAvatarURL({ dynamic: true, size: 128 }))
+                    .setFooter({ text: newUser.id })
+                    .setTimestamp();
+
+                // log
+                logMessage(guild, embed);
             }
         });
 
@@ -197,7 +210,7 @@ export function doLogging(client, args = null) {
                 .setFooter({text: member.user.id})
                 .setTimestamp();
 
-            logMessage(guild, embed);
+            logMessage(member.guild, embed);
         });
 
         // user timeout
