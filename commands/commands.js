@@ -172,7 +172,7 @@ export function doCommands(client) {
                     // join args into one string
                     const input = args.join(" ");
                     if (!input.includes("|"))
-                        return msg.reply("❌ Invalid format. Use: '$add-trigger trigger | response', make sure you use the '|' delimeter").catch(() => {});
+                        return msg.reply("❌ Invalid format make sure you use the '|' delimeter").catch(() => {});
 
                     // split into trigger + response
                     const [trigger, response] = input.split("|").map(s => s.trim());
@@ -186,7 +186,7 @@ export function doCommands(client) {
                     msg.reply(`✅ Trigger added!\n**Trigger:** ${trigger}\n**Response:** ${response}`).catch(() => {});
                 } catch (err) {
                     console.error("Add-trigger command error:", err);
-                    msg.reply("❌ Something went wrong while adding a trigger.").catch(() => {});
+                    msg.reply("❌ Something went wrong while adding a trigger").catch(() => {});
                 }
             }
 
@@ -209,7 +209,7 @@ export function doCommands(client) {
                         msg.reply(`❌ No trigger found with the name: **${trigger}**`).catch(() => {});
                 } catch (err) {
                     console.error("Remove-trigger command error:", err);
-                    msg.reply("❌ Something went wrong while removing the trigger.").catch(() => {});
+                    msg.reply("❌ Something went wrong while removing the trigger").catch(() => {});
                 }
             }
             
@@ -223,7 +223,7 @@ export function doCommands(client) {
                     const triggers = getTriggers(msg.guild.id);
                     const entries = Object.entries(triggers);
 
-                    if (!entries.length) return msg.reply("ℹ️ There are no triggers set for this server.").catch(() => {});
+                    if (!entries.length) return msg.reply("ℹ️ There are no triggers set for this server").catch(() => {});
 
                     // create list
                     const triggerList = entries
@@ -236,7 +236,7 @@ export function doCommands(client) {
                     }).catch(() => {});
                 } catch (err) {
                     console.error("Get-trigger command error:", err);
-                    msg.reply("❌ Something went wrong while getting the triggers.").catch(() => {});
+                    msg.reply("❌ Something went wrong while getting the triggers").catch(() => {});
                 }
             }
 
