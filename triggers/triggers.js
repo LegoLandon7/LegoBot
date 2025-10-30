@@ -5,7 +5,7 @@ import { PREFIX } from "../commands/commands.js";
 export function doTriggers(client, args = null) {
     try {
         client.on("messageCreate", async (message) => {
-            // ignore
+            // ignore bot messages and commands
             if (!message.guild || message.author.bot) return;
             if (message.content.startsWith(PREFIX)) return;
 
@@ -13,13 +13,14 @@ export function doTriggers(client, args = null) {
             const triggers = getTriggers(message.guild.id);
             if (!triggers || Object.keys(triggers).length === 0) return;
 
-            // loop through triggers and check for match
-            for (const [trigger, response] of Object.entries(triggers)) {
-                // match entire word or phrase (case-insensitive)
-                const regex = new RegExp(`\\b${trigger}\\b`, "i");
+            const content = message.content.toLowerCase();
 
-                if (regex.test(message.content)) {
-                    // send response
+            // loop through triggers
+            for (const [trigger, response] of Object.entries(triggers)) {
+                const lowerTrigger = trigger.toLowerCase();
+
+                // match anywhere in the message (case-insensitive)
+                if (content.includes(lowerTrigger)) {
                     await message.channel.send(response).catch(() => {});
                     break; // stop after first match
                 }
