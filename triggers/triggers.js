@@ -2,6 +2,7 @@ import { EmbedBuilder } from "discord.js";
 import { getTriggers, addTrigger, removeTrigger } from "./save-trigger.js";
 import { PREFIX } from "../commands/commands.js";
 
+// triggers
 export function doTriggers(client, args = null) {
     try {
         client.on("messageCreate", async (message) => {
