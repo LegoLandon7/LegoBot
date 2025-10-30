@@ -1,9 +1,10 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { parseDuration,  fetchMember} from "../functions/utilities.js";
 import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../logging/save-log-channels.js";
+import { addTrigger, removeTrigger, getTriggers } from "../triggers/save-trigger.js";
 import { doLogging } from "../logging/logger.js";
 
-const PREFIX = "$";
+export const PREFIX = "$";
 const EMBED_COLOR = "#676767";
 const EMBED_DESC = "This is the best bot ever made!";
 
@@ -47,7 +48,7 @@ export function doCommands(client) {
             if (command === `${PREFIX}help`) {
             // page1
             const page1 = new EmbedBuilder()
-                .setTitle("Help Menu (1/5)")
+                .setTitle("Help Menu (1/6)")
                 .setDescription("Main Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -61,36 +62,36 @@ export function doCommands(client) {
 
             // page2
             const page2 = new EmbedBuilder()
-                .setTitle("Help Menu (2/5)")
+                .setTitle("Help Menu (2/6)")
                 .setDescription("Info Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
                     { name: "avatar [user]", value: "Shows user avatar" },
-                    { name: "userinfo [user]", value: "Shows user info" },
-                    { name: "serverinfo", value: "Shows server info" }
+                    { name: "user-info [user]", value: "Shows user info" },
+                    { name: "server-info", value: "Shows server info" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
             // page3
             const page3 = new EmbedBuilder()
-                .setTitle("Help Menu (3/5)")
+                .setTitle("Help Menu (3/6)")
                 .setDescription("Moderation Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
                     { name: "ban [user] [reason]", value: "Bans a user" },
                     { name: "kick [user] [reason]", value: "Kicks a user" },
                     { name: "timeout [user] [duration] [reason]", value: "Timeouts a user" },
-                    { name: "untimeout [user]", value: "Removes timeout from a user" }
+                    { name: "un-timeout [user]", value: "Removes timeout from a user" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
             // page4
             const page4 = new EmbedBuilder()
-                .setTitle("Help Menu (4/5)")
+                .setTitle("Help Menu (4/6)")
                 .setDescription("Moderation Commands (extended)")
                 .setColor(EMBED_COLOR)
                 .addFields(
-                    { name: "setnick [user] [nickname]", value: "Changes nickname" },
+                    { name: "set-nick [user] [nickname]", value: "Changes nickname" },
                     { name: "role [user] [role]", value: "Changes role of a user" },
                     { name: "purge [amount]", value: "Purges messages" },
                     { name: "echo [channel] [text]", value: "Echos a message in channel" }
@@ -99,19 +100,31 @@ export function doCommands(client) {
 
             // page5
             const page5 = new EmbedBuilder()
-                .setTitle("Help Menu (5/5)")
+                .setTitle("Help Menu (5/6)")
                 .setDescription("Logging Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
-                    { name: "setlog [channel]", value: "sets, removes, or changes log channel" },
-                    { name: "logchannel", value: "gets current log channel" },
-                    { name: "setwelcome [channel]", value: "sets, removes, or changes welcome channel" },
-                    { name: "welcomechannel", value: "gets current welcome channel" }
+                    { name: "set-log [channel]", value: "sets, removes, or changes log channel" },
+                    { name: "log-channel", value: "gets current log channel" },
+                    { name: "set-welcome [channel]", value: "sets, removes, or changes welcome channel" },
+                    { name: "welcome-channel", value: "gets current welcome channel" }
+                )
+                .setFooter({ text: EMBED_DESC });
+
+            // page6
+            const page6 = new EmbedBuilder()
+                .setTitle("Help Menu (6/6)")
+                .setDescription("Trigger Commands")
+                .setColor(EMBED_COLOR)
+                .addFields(
+                    { name: "add-trigger [trigger] | [message]", value: "adds a trigger" },
+                    { name: "remove-trigger [trigger]", value: "removes a trigger" },
+                    { name: "list-triggers", value: "list all triggers" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
                 
-            const pages = [page1, page2, page3, page4, page5];
+            const pages = [page1, page2, page3, page4, page5, page6];
 
             // input
             let currentPage;
@@ -127,7 +140,6 @@ export function doCommands(client) {
                 new ButtonBuilder().setCustomId("next").setLabel("▶️").setStyle(1)
             );
 
-            // ✅ Fix: changed helpPages → pages
             const message = await msg.reply({ embeds: [pages[currentPage]], components: [row] });
 
             const collector = message.createMessageComponentCollector({
@@ -150,8 +162,86 @@ export function doCommands(client) {
             });
             }
 
-            //-----------------setlog----------------
-            if (command === `${PREFIX}setlog`) {
+            //-----------------add-trigger----------------
+            if (command === `${PREFIX}add-trigger`) {
+                try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
+                        return msg.reply("❌ You don't have permissions to manage guild").catch(() => {});
+
+                    // join args into one string
+                    const input = args.join(" ");
+                    if (!input.includes("|"))
+                        return msg.reply("❌ Invalid format. Use: '$add-trigger trigger | response', make sure you use the '|' delimeter").catch(() => {});
+
+                    // split into trigger + response
+                    const [trigger, response] = input.split("|").map(s => s.trim());
+
+                    if (!trigger || !response)
+                        return msg.reply("❌ You must include both a trigger and a response.").catch(() => {});
+
+                    // save trigger
+                    addTrigger(msg.guild.id, trigger, response);
+
+                    msg.reply(`✅ Trigger added!\n**Trigger:** ${trigger}\n**Response:** ${response}`).catch(() => {});
+                } catch (err) {
+                    console.error("Add-trigger command error:", err);
+                    msg.reply("❌ Something went wrong while adding a trigger.").catch(() => {});
+                }
+            }
+
+            //-----------------remove-trigger----------------
+            if (command === `${PREFIX}remove-trigger`) {
+                try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
+                        return msg.reply("❌ You don't have permissions to manage guild").catch(() => {});
+
+                    // get trigger
+                    const trigger = args.join(" ").trim();
+                    if (!trigger) return msg.reply("❌ Please specify which trigger to remove. Example: `$remove-trigger hello there`").catch(() => {});
+
+                    const success = removeTrigger(msg.guild.id, trigger);
+
+                    if (success)
+                        msg.reply(`✅ Removed trigger: **${trigger}**`).catch(() => {});
+                    else
+                        msg.reply(`❌ No trigger found with the name: **${trigger}**`).catch(() => {});
+                } catch (err) {
+                    console.error("Remove-trigger command error:", err);
+                    msg.reply("❌ Something went wrong while removing the trigger.").catch(() => {});
+                }
+            }
+            
+            //-----------------list-triggers----------------
+            if (command === `${PREFIX}list-triggers`) {
+                try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
+                        return msg.reply("❌ You don't have permissions to manage guild").catch(() => {});
+
+                    const triggers = getTriggers(msg.guild.id);
+                    const entries = Object.entries(triggers);
+
+                    if (!entries.length) return msg.reply("ℹ️ There are no triggers set for this server.").catch(() => {});
+
+                    // create list
+                    const triggerList = entries
+                        .map(([trigger, response]) => `**${trigger}** -> ${response}`)
+                        .join("\n");
+
+                    // message
+                    msg.reply({
+                        content: `📘 **Current Triggers:**\n${triggerList}`,
+                    }).catch(() => {});
+                } catch (err) {
+                    console.error("Get-trigger command error:", err);
+                    msg.reply("❌ Something went wrong while getting the triggers.").catch(() => {});
+                }
+            }
+
+            //-----------------set-log----------------
+            if (command === `${PREFIX}set-log`) {
                 // permissions
                 if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
                     return msg.reply("❌ You don't have permissions to manage guild");
@@ -203,8 +293,8 @@ export function doCommands(client) {
                 msg.reply({ embeds: [embed] });
             }
 
-            //-----------------logchannel----------------
-            if (command === `${PREFIX}logchannel`) {
+            //-----------------log-channel----------------
+            if (command === `${PREFIX}log-channel`) {
                 // permissions
                 if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return msg.reply("❌ You don't have permissions to manage guild");
 
@@ -228,8 +318,8 @@ export function doCommands(client) {
                 msg.reply(`✅ The current log channel for this server is ${channel}`);
             }
 
-            //-----------------setwelcome----------------
-            if (command === `${PREFIX}setwelcome`) {
+            //-----------------set-welcome----------------
+            if (command === `${PREFIX}set-welcome`) {
                 // permissions
                 if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
                     return msg.reply("❌ You don't have permissions to manage guild");
@@ -281,7 +371,7 @@ export function doCommands(client) {
                 msg.reply({ embeds: [embed] });
             }
 
-            //-----------------welcomechannel----------------
+            //-----------------welcome-channel----------------
             if (command === `${PREFIX}welcomechannel`) {
                 // permissions
                 if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return msg.reply("❌ You don't have permissions to manage guild");
@@ -334,8 +424,8 @@ export function doCommands(client) {
             }
             }	
 
-            //-----------------userinfo----------------
-            if (command === `${PREFIX}userinfo`) {
+            //-----------------user-info----------------
+            if (command === `${PREFIX}user-info`) {
                 try {
                     // get member info
                     const member = await fetchMember(msg, args[0]?.trim() || null);
@@ -376,8 +466,8 @@ export function doCommands(client) {
                 }
             }
 
-            //-----------------serverinfo----------------
-            if (command === `${PREFIX}serverinfo`) {
+            //-----------------server-info----------------
+            if (command === `${PREFIX}server-info`) {
                 try {
                     // get basic guild info
                     const { guild } = msg;
@@ -523,8 +613,8 @@ export function doCommands(client) {
                 msg.reply(`✅ Timed out ${member} | Reason: ${reason}`);
             }
 
-            //-----------------untimeout----------------
-            if (command === `${PREFIX}untimeout`) {
+            //-----------------un-timeout----------------
+            if (command === `${PREFIX}un-timeout`) {
                 // get member info
                 const member = await fetchMember(msg, args[0]?.trim() || null);
                 if (!member) return msg.reply("❌ Could not find that user");
@@ -546,8 +636,8 @@ export function doCommands(client) {
                 msg.reply(`✅ Untimed out ${member}`);
             }
 
-            //-----------------setnick----------------
-            if (command === `${PREFIX}setnick`) {
+            //-----------------set-nick----------------
+            if (command === `${PREFIX}set-nick`) {
                 let member;
                 let nick;
 
