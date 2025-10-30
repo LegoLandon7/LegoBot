@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
-import { parseDuration,  fetchMember} from "../functions/utilities.js";
+import { parseDuration,  fetchMember, getFolderSize} from "../functions/utilities.js";
 import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../logging/save-log-channels.js";
 import { addTrigger, removeTrigger, getTriggers } from "../triggers/save-trigger.js";
 import { doLogging } from "../logging/logger.js";
@@ -54,7 +54,7 @@ export function doCommands(client) {
                 .addFields(
                     { name: "prefix: ", value: PREFIX },
                     { name: "help [page]", value: "Shows this menu of commands" },
-                    { name: "info", value: "Shows info about the bot" },
+                    { name: "bot-info", value: "Shows info about the bot" },
                     { name: "ping", value: "Gets the ping of the bot" }
                 )
                 .setFooter({ text: EMBED_DESC })
@@ -526,8 +526,8 @@ export function doCommands(client) {
                 }
             }
 
-            //-----------------info----------------
-            if (command === `${PREFIX}info`) {
+            //-----------------bot-info----------------
+            if (command === `${PREFIX}bot-info`) {
                 const embed = new EmbedBuilder()
                     .setTitle("LegoBot Info")
                     .setDescription("This is a bot made as a side-project using Node.js")
@@ -535,7 +535,8 @@ export function doCommands(client) {
                     .addFields(
                         { name: "Creator", value: "cc_landonlego", inline: false },
                         { name: "GitHub", value: "[github](https://github.com/LegoLandon7/LegoBot)", inline: true },
-                        { name: "Invite Link", value: "[invite bot](https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands)", inline: true }
+                        { name: "Invite Link", value: "[invite bot](https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands)", inline: true },
+                        { name: "Bot Size:", value: `${getFolderSize("../")}`, inline: false }
                     )
                     .setFooter({ text: EMBED_DESC })
                     .setTimestamp();

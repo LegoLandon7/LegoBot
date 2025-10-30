@@ -1,3 +1,6 @@
+import fs from "fs";
+import path from "path";
+
 // convert duration strings
 export function parseDuration(duration) {
     if (!duration || typeof duration !== "string") return null;
@@ -49,4 +52,35 @@ export async function fetchMember(msg, input) {
 
     // nothing found
     return null;
+}
+
+// folder size
+
+export function getFolderSize(folderPath) {
+    let total = 0;
+
+    function walk(dir) {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const fullPath = path.join(dir, file);
+            const stats = fs.statSync(fullPath);
+
+            if (stats.isDirectory()) {
+                walk(fullPath);
+            } else {
+                total += stats.size;
+            }
+        }
+    }
+
+    walk(folderPath);
+    return formatBytes(total); // bytes
+}
+
+function formatBytes(bytes) {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
 }
