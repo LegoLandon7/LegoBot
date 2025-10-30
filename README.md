@@ -14,3 +14,6 @@ and replace 'YOUR_TOKEN_HERE' with your bot token then do 'npm install dotenv' i
 afterwards just do 'node index.js' in the terminal to start it, then do 'ctrl c' bind to stop it
 
 keep in mind any changes done will require you to restart the bot
+
+
+feel free to dm me 'cc_landonlego' on discord (or friend me) if you have any questions!
