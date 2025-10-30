@@ -1,5 +1,6 @@
 # LegoBot
 -- INFO --
+
 this bot is made by me 'cc_landonlego' however ive used chatgpt for a lot of help on this mainly as a learning tool
 
 Add the bot! -> https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands
