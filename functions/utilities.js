@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import { PermissionsBitField } from "discord.js";
 
 // convert duration strings
 export function parseDuration(duration) {
@@ -90,7 +89,6 @@ export async function fetchMember(msg, input) {
 }
 
 // folder size
-
 export function getFolderSize(folderPath) {
     let total = 0;
 
@@ -112,6 +110,7 @@ export function getFolderSize(folderPath) {
     return formatBytes(total); // bytes
 }
 
+// format bytes
 function formatBytes(bytes) {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;

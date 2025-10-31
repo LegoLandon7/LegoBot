@@ -1,4 +1,4 @@
-import { getLogChannel, getWelcomeChannel,  setWelcomeChannel, setLogChannel} from "./save-log-channels.js";
+import { getLogChannel, getWelcomeChannel} from "./save-log-channels.js";
 import { EmbedBuilder } from "discord.js";
 
 export function sendToChannel(getFn, guild, content) {

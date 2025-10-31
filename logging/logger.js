@@ -1,6 +1,5 @@
-import { EmbedBuilder, PermissionsBitField } from "discord.js";
-import { getLogChannel, getWelcomeChannel } from "../functions/save-log-channels.js";
-import { sendToChannel, logMessage, welcomeMessage, formatMember } from "../functions/logging.js";
+import { EmbedBuilder} from "discord.js";
+import { logMessage, welcomeMessage, formatMember } from "../functions/logging.js";
 
 const BAD_COLOR = "#ff0000";
 const MEDIUM_COLOR = "#ffff00";
