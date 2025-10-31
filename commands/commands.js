@@ -66,9 +66,9 @@ export function doCommands(client) {
                 .setDescription("Info Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
-                    { name: "avatar [user]", value: "Shows user avatar" },
-                    { name: "user-info [user]", value: "Shows user info" },
-                    { name: "server-info", value: "Shows server info" }
+                    { name: "avatar [user]", value: "Shows a users avatar" },
+                    { name: "user-info [user]", value: "Shows a users info" },
+                    { name: "server-info", value: "Shows a servers info" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
@@ -81,7 +81,7 @@ export function doCommands(client) {
                     { name: "ban [user] [reason]", value: "Bans a user" },
                     { name: "unban [user]", value: "Unbans a user" },
                     { name: "kick [user] [reason]", value: "Kicks a user" },
-                    { name: "timeout [user] [duration] [reason]", value: "Timeouts a user" },
+                    { name: "timeout [user] [duration] [reason]", value: "Times out a user" },
                     { name: "untimeout [user]", value: "Removes timeout from a user" }
                 )
                 .setFooter({ text: EMBED_DESC });
@@ -92,10 +92,10 @@ export function doCommands(client) {
                 .setDescription("Moderation Commands (extended)")
                 .setColor(EMBED_COLOR)
                 .addFields(
-                    { name: "set-nick [user] [nickname]", value: "Changes nickname" },
+                    { name: "set-nick [user] [nickname]", value: "Changes nickname of a user" },
                     { name: "role [user] [role]", value: "Changes role of a user" },
                     { name: "purge [amount]", value: "Purges messages" },
-                    { name: "echo [channel] [text]", value: "Echos a message in channel" }
+                    { name: "echo [channel] [text]", value: "Echos a message in a channel" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
@@ -537,7 +537,7 @@ export function doCommands(client) {
                         { name: "Creator", value: "cc_landonlego", inline: false },
                         { name: "GitHub", value: "[github](https://github.com/LegoLandon7/LegoBot)", inline: true },
                         { name: "Invite Link", value: "[invite bot](https://discord.com/oauth2/authorize?client_id=1432705622771765439&permissions=8&integration_type=0&scope=bot+applications.commands)", inline: true },
-                        { name: "Bot Size:", value: `${getFolderSize("../")}`, inline: false }
+                        { name: "Bot Size", value: `${getFolderSize("../")}`, inline: false }
                     )
                     .setFooter({ text: EMBED_DESC })
                     .setTimestamp();
