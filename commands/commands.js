@@ -373,7 +373,7 @@ export function doCommands(client) {
             }
 
             //-----------------welcome-channel----------------
-            if (command === `${PREFIX}welcomechannel`) {
+            if (command === `${PREFIX}welcome-channel`) {
                 // permissions
                 if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return msg.reply("❌ You don't have permissions to manage guild");
 
