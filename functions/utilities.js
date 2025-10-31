@@ -1,5 +1,37 @@
 import fs from "fs";
 import path from "path";
+import https from "https";
+
+// file uploader
+export async function uploadToTransferSh(filePath) {
+    return new Promise((resolve, reject) => {
+        const fileName = path.basename(filePath);
+        const req = https.request({
+            method: "PUT",
+            hostname: "transfer.sh",
+            path: `/${fileName}`,
+            headers: {
+                "Content-Type": "application/octet-stream"
+            }
+        }, res => {
+            let body = "";
+            res.on("data", chunk => body += chunk);
+            res.on("end", () => {
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    resolve(body.trim());
+                } else {
+                    reject(new Error(`Transfer.sh upload failed: ${res.statusCode} ${body}`));
+                }
+            });
+        });
+
+        req.on("error", reject);
+
+        const fileStream = fs.createReadStream(filePath);
+        fileStream.pipe(req);
+        fileStream.on("error", reject);
+    });
+}
 
 // convert duration strings
 export function parseDuration(duration) {

@@ -3,3 +3,5 @@ node_modules
 logging/log-channels.json
 logging/welcome-channels.json
 triggers/triggers.json
+logging/purge-logs/
+logging/logs/

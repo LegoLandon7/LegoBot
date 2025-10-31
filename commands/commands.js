@@ -1,8 +1,10 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { parseDuration,  fetchMember, fetchUser, getFolderSize} from "../functions/utilities.js";
-import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../functions/save-log-channels.js";
-import { addTrigger, removeTrigger, getTriggers } from "../functions/save-trigger.js";
-import { doLogging } from "../logging/logger.js";
+import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../logging/functions/save-log-channels.js";
+import { addTrigger, removeTrigger, getTriggers } from "../triggers/functions/save-trigger.js";
+import { doLogging, purgeLog } from "../logging/logger.js";
+import { logMessage } from "../logging/functions/logging.js";
+import { zipGuildLogs } from "../logging/functions/log-files.js";
 
 export const PREFIX = "$";
 const EMBED_COLOR = "#676767";
@@ -48,7 +50,7 @@ export function doCommands(client) {
             if (command === `${PREFIX}help`) {
             // page1
             const page1 = new EmbedBuilder()
-                .setTitle("Help Menu (1/6)")
+                .setTitle("Help Menu (1/7)")
                 .setDescription("Main Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -62,7 +64,7 @@ export function doCommands(client) {
 
             // page2
             const page2 = new EmbedBuilder()
-                .setTitle("Help Menu (2/6)")
+                .setTitle("Help Menu (2/7)")
                 .setDescription("Info Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -74,7 +76,7 @@ export function doCommands(client) {
 
             // page3
             const page3 = new EmbedBuilder()
-                .setTitle("Help Menu (3/6)")
+                .setTitle("Help Menu (3/7)")
                 .setDescription("Moderation Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -88,7 +90,7 @@ export function doCommands(client) {
 
             // page4
             const page4 = new EmbedBuilder()
-                .setTitle("Help Menu (4/6)")
+                .setTitle("Help Menu (4/7)")
                 .setDescription("Moderation Commands (extended)")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -101,20 +103,21 @@ export function doCommands(client) {
 
             // page5
             const page5 = new EmbedBuilder()
-                .setTitle("Help Menu (5/6)")
+                .setTitle("Help Menu (5/7)")
                 .setDescription("Logging Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
                     { name: "set-log [channel]", value: "sets, removes, or changes log channel" },
                     { name: "log-channel", value: "gets current log channel" },
                     { name: "set-welcome [channel]", value: "sets, removes, or changes welcome channel" },
-                    { name: "welcome-channel", value: "gets current welcome channel" }
+                    { name: "welcome-channel", value: "gets current welcome channel" },
+                    { name: "download-logs", value: "downloads logs as a zip file" }
                 )
                 .setFooter({ text: EMBED_DESC });
 
             // page6
             const page6 = new EmbedBuilder()
-                .setTitle("Help Menu (6/6)")
+                .setTitle("Help Menu (6/7)")
                 .setDescription("Trigger Commands")
                 .setColor(EMBED_COLOR)
                 .addFields(
@@ -124,8 +127,18 @@ export function doCommands(client) {
                 )
                 .setFooter({ text: EMBED_DESC });
 
+            // page7
+            const page7 = new EmbedBuilder()
+                .setTitle("Help Menu (7/7)")
+                .setDescription("N/A")
+                .setColor(EMBED_COLOR)
+                .addFields(
+                    { name: "N/A" }
+                )
+                .setFooter({ text: EMBED_DESC });
+
                 
-            const pages = [page1, page2, page3, page4, page5, page6];
+            const pages = [page1, page2, page3, page4, page5, page6, page7];
 
             // input
             let currentPage;
@@ -161,6 +174,25 @@ export function doCommands(client) {
             collector.on("end", () => {
                 message.edit({ components: [] }); // remove buttons after timeout
             });
+            }
+
+            //-----------------download-logs----------------
+            if (command === `${PREFIX}download-logs`) {
+                try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageGuild))
+                        return msg.reply("❌ You don't have permissions to manage guild").catch(() => {});
+
+                    // zip
+                    const zipPath = await zipGuildLogs(msg.guild.id);
+                    await msg.channel.send({
+                        content: `🗂️ Here are all logs for **${msg.guild.name}**`,
+                        files: [zipPath],
+                    });
+                } catch (err) {
+                    console.error("Download logs error:", err);
+                    msg.reply("❌ Something went wrong while downloading logs").catch(() => {});
+                }
             }
 
             //-----------------add-trigger----------------
@@ -812,7 +844,7 @@ export function doCommands(client) {
             //-----------------purge----------------
             if (command === `${PREFIX}purge`) {
                 try {
-                    // check permissions
+                    // permissions
                     if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMessages))
                         return msg.reply("❌ You don't have permission to delete messages");
                     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMessages))
@@ -823,14 +855,22 @@ export function doCommands(client) {
                     if (isNaN(amount) || amount < 1 || amount > 100)
                         return msg.reply("❌ Please provide a number between **1** and **100**");
 
-                    // delete messages
-                    await msg.channel.bulkDelete(amount, true).then(deleted => {
-                        msg.channel.send(`✅ Purged **${deleted.size}** messages.`)
-                        .then(m => setTimeout(() => m.delete().catch(() => {}), 5000)); // auto-delete reply after 5s
-                    }).catch(err => {
+                    try {
+                        // delete messages
+                        const fetched = await msg.channel.messages.fetch({ limit: amount });
+                        const deleted = await msg.channel.bulkDelete(fetched, true);
+
+                        const confirm = await msg.channel.send(`✅ Purged **${deleted.size}** messages.`);
+                        setTimeout(() => confirm.delete().catch(() => {}), 5000);
+
+                        // log
+                        await purgeLog(deleted.size, msg.channel, fetched);
+
+                    } catch (err) {
                         console.error("Failed to purge:", err);
                         msg.reply("❌ I couldn't delete messages. Make sure they aren't too old (14 days max)");
-                    });
+                    }
+
                 } catch (err) {
                     console.error("Error in purge command:", err);
                     msg.reply("❌ Something went wrong while trying to delete messages");

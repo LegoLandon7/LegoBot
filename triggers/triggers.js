@@ -1,4 +1,4 @@
-import { getTriggers } from "../functions/save-trigger.js";
+import { getTriggers } from "./functions/save-trigger.js";
 import { PREFIX } from "../commands/commands.js";
 
 // triggers
