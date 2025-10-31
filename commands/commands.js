@@ -350,7 +350,7 @@ export function doCommands(client) {
                         .setTitle("🗑️ Welcome Channel Removed")
                         .setDescription(`Removed ${targetChannel} as the welcome channel.`)
                         .setColor(0xff0000)
-                        .setFooter({ text: "Use $setwelcome again to set a new channel." });
+                        .setFooter({ text: "Use $set-welcome again to set a new channel." });
 
                     return msg.reply({ embeds: [embed] });
                 }
@@ -367,7 +367,7 @@ export function doCommands(client) {
                             : `Welcome messages will now be sent to ${targetChannel}`
                     )
                     .setColor(0x00ff00)
-                    .setFooter({ text: "Use $setwelcome again to change or remove it." });
+                    .setFooter({ text: "Use $set-welcome again to change or remove it." });
 
                 msg.reply({ embeds: [embed] });
             }
@@ -379,7 +379,7 @@ export function doCommands(client) {
 
                 // get the saved channel ID
                 const channelId = getWelcomeChannel(msg.guild.id);
-                if (!channelId) return msg.reply("❌ No welcome channel set. Use `$setwelcome [channel]` to set one.");
+                if (!channelId) return msg.reply("❌ No welcome channel set. Use `$set-welcome [channel]` to set one.");
 
                 // try cache first
                 let channel = msg.guild.channels.cache.get(channelId);
