@@ -100,7 +100,7 @@ export function doLogging(client) {
 
                     // log
                     logMessage(newMember.guild, embed);
-                    appendLog(newMember.guild.id, "nickname-update.txt", `${newMember.user.tag} | ${newMember.user.id} | New Nickname: ${newMember.nickname} | Old Nickname: ${oldMember.nickname}`);
+                    appendLog(newMember.guild.id, "nickname-updates.txt", `${newMember.user.tag} | ${newMember.user.id} | New Nickname: ${newMember.nickname} | Old Nickname: ${oldMember.nickname}`);
                 }
 
                 // Role changes
@@ -181,7 +181,11 @@ export function doLogging(client) {
                         .setImage(newUser.displayAvatarURL({ dynamic: true, size: 512 }))
                         .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
                         .setTimestamp();
+
+                    // log
                     logMessage(guild, embed);
+                    const avatar = member.user.displayAvatarURL({ format: "png", dynamic: true });
+                    appendLog(member.guild.id, "avatar-updates.txt", `${member.user.tag} | ${member.user.id} | ${avatar}`);
                 }
             } catch (err) {
                 console.error("userUpdate logging error:", err);
