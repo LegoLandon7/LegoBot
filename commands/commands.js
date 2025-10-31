@@ -48,132 +48,136 @@ export function doCommands(client) {
 
             //-----------------help----------------
             if (command === `${PREFIX}help`) {
-            // page1
-            const page1 = new EmbedBuilder()
-                .setTitle("Help Menu (1/7)")
-                .setDescription("Main Commands")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "prefix: ", value: PREFIX },
-                    { name: "help [page]", value: "Shows this menu of commands" },
-                    { name: "bot-info", value: "Shows info about the bot" },
-                    { name: "ping", value: "Gets the ping of the bot" }
-                )
-                .setFooter({ text: EMBED_DESC })
-                .setTimestamp();
+                // page1
+                const page1 = new EmbedBuilder()
+                    .setTitle("Help Menu (1/7)")
+                    .setDescription("Main Commands")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "prefix: ", value: PREFIX },
+                        { name: "help [page]", value: "Shows this menu of commands" },
+                        { name: "bot-info", value: "Shows info about the bot" },
+                        { name: "ping", value: "Gets the ping of the bot" }
+                    )
+                    .setFooter({ text: EMBED_DESC })
+                    .setTimestamp();
 
-            // page2
-            const page2 = new EmbedBuilder()
-                .setTitle("Help Menu (2/7)")
-                .setDescription("Info Commands")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "avatar [user]", value: "Shows a users avatar" },
-                    { name: "user-info [user]", value: "Shows a users info" },
-                    { name: "server-info", value: "Shows a servers info" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page2
+                const page2 = new EmbedBuilder()
+                    .setTitle("Help Menu (2/7)")
+                    .setDescription("Info Commands")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "avatar [user]", value: "Shows a users avatar" },
+                        { name: "user-info [user]", value: "Shows a users info" },
+                        { name: "server-info", value: "Shows a servers info" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-            // page3
-            const page3 = new EmbedBuilder()
-                .setTitle("Help Menu (3/7)")
-                .setDescription("Moderation Commands")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "ban [user] [reason]", value: "Bans a user" },
-                    { name: "unban [user]", value: "Unbans a user" },
-                    { name: "kick [user] [reason]", value: "Kicks a user" },
-                    { name: "timeout [user] [duration] [reason]", value: "Times out a user" },
-                    { name: "untimeout [user]", value: "Removes timeout from a user" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page3
+                const page3 = new EmbedBuilder()
+                    .setTitle("Help Menu (3/7)")
+                    .setDescription("Moderation Commands")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "ban [user] [reason]", value: "Bans a user" },
+                        { name: "unban [user]", value: "Unbans a user" },
+                        { name: "kick [user] [reason]", value: "Kicks a user" },
+                        { name: "timeout [user] [duration] [reason]", value: "Times out a user" },
+                        { name: "untimeout [user]", value: "Removes timeout from a user" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-            // page4
-            const page4 = new EmbedBuilder()
-                .setTitle("Help Menu (4/7)")
-                .setDescription("Moderation Commands (extended)")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "set-nick [user] [nickname]", value: "Changes nickname of a user" },
-                    { name: "role [user] [role]", value: "Changes role of a user" },
-                    { name: "purge [amount]", value: "Purges messages" },
-                    { name: "echo [channel] [text]", value: "Echos a message in a channel" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page4
+                const page4 = new EmbedBuilder()
+                    .setTitle("Help Menu (4/7)")
+                    .setDescription("Moderation Commands (extended)")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "set-nick [user] [nickname]", value: "Changes nickname of a user" },
+                        { name: "role [user] [role]", value: "Changes role of a user" },
+                        { name: "purge [amount]", value: "Purges messages" },
+                        { name: "echo [channel] [text]", value: "Echos a message in a channel" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-            // page5
-            const page5 = new EmbedBuilder()
-                .setTitle("Help Menu (5/7)")
-                .setDescription("Logging Commands")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "set-log [channel]", value: "sets, removes, or changes log channel" },
-                    { name: "log-channel", value: "gets current log channel" },
-                    { name: "set-welcome [channel]", value: "sets, removes, or changes welcome channel" },
-                    { name: "welcome-channel", value: "gets current welcome channel" },
-                    { name: "download-logs", value: "downloads logs as a zip file" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page5
+                const page5 = new EmbedBuilder()
+                    .setTitle("Help Menu (5/7)")
+                    .setDescription("Logging Commands")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "set-log [channel]", value: "sets, removes, or changes log channel" },
+                        { name: "log-channel", value: "gets current log channel" },
+                        { name: "set-welcome [channel]", value: "sets, removes, or changes welcome channel" },
+                        { name: "welcome-channel", value: "gets current welcome channel" },
+                        { name: "download-logs", value: "downloads logs as a zip file" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-            // page6
-            const page6 = new EmbedBuilder()
-                .setTitle("Help Menu (6/7)")
-                .setDescription("Trigger Commands")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "add-trigger [trigger] | [message]", value: "adds a trigger" },
-                    { name: "remove-trigger [trigger]", value: "removes a trigger" },
-                    { name: "list-triggers", value: "list all triggers" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page6
+                const page6 = new EmbedBuilder()
+                    .setTitle("Help Menu (6/7)")
+                    .setDescription("Trigger Commands")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "add-trigger [trigger] | [message]", value: "adds a trigger" },
+                        { name: "remove-trigger [trigger]", value: "removes a trigger" },
+                        { name: "list-triggers", value: "list all triggers" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-            // page7
-            const page7 = new EmbedBuilder()
-                .setTitle("Help Menu (7/7)")
-                .setDescription("N/A")
-                .setColor(EMBED_COLOR)
-                .addFields(
-                    { name: "N/A" }
-                )
-                .setFooter({ text: EMBED_DESC });
+                // page7
+                const page7 = new EmbedBuilder()
+                    .setTitle("Help Menu (7/7)")
+                    .setDescription("N/A")
+                    .setColor(EMBED_COLOR)
+                    .addFields(
+                        { name: "N/A", value: "No commands on this page" }
+                    )
+                    .setFooter({ text: EMBED_DESC });
 
-                
-            const pages = [page1, page2, page3, page4, page5, page6, page7];
+                    
+                const pages = [page1, page2, page3, page4, page5, page6, page7];
 
-            // input
-            let currentPage;
-            args[0] ? (currentPage = parseInt(args[0]) - 1) : (currentPage = 0);
+                // input
+                let currentPage;
+                args[0] ? (currentPage = parseInt(args[0]) - 1) : (currentPage = 0);
 
-            // range check
-            if (isNaN(currentPage) || currentPage < 0 || currentPage >= pages.length)
-                return msg.reply(`❌ That page doesn't exist, please give a page between 1 and ${pages.length}`);
+                // range check
+                if (isNaN(currentPage) || currentPage < 0 || currentPage >= pages.length)
+                    return msg.reply(`❌ That page doesn't exist, please give a page between 1 and ${pages.length}`);
 
-            // build row
-            const row = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId("prev").setLabel("◀️").setStyle(1),
-                new ButtonBuilder().setCustomId("next").setLabel("▶️").setStyle(1)
-            );
+                // build row
+                const row = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder().setCustomId("prev").setLabel("◀️").setStyle(1),
+                    new ButtonBuilder().setCustomId("next").setLabel("▶️").setStyle(1)
+                );
 
-            const message = await msg.reply({ embeds: [pages[currentPage]], components: [row] });
+                const message = await msg.reply({ embeds: [pages[currentPage]], components: [row] });
 
-            const collector = message.createMessageComponentCollector({
-                time: 120000, // 120 seconds
-                filter: (i) => i.user.id === msg.author.id,
-            });
+                const collector = message.createMessageComponentCollector({
+                    time: 120000, // 120 seconds
+                    filter: (i) => i.user.id === msg.author.id,
+                });
 
-            collector.on("collect", async (interaction) => {
-                if (interaction.customId === "prev") { // prev
-                    currentPage = (currentPage - 1 + pages.length) % pages.length;
-                } else if (interaction.customId === "next") { // next
-                    currentPage = (currentPage + 1) % pages.length;
-                }
+                collector.on("collect", async (interaction) => {
+                    if (interaction.customId === "prev") { // prev
+                        currentPage = (currentPage - 1 + pages.length) % pages.length;
+                    } else if (interaction.customId === "next") { // next
+                        currentPage = (currentPage + 1) % pages.length;
+                    }
 
-                await interaction.update({ embeds: [pages[currentPage]], components: [row] });
-            });
+                    await interaction.update({ embeds: [pages[currentPage]], components: [row] });
+                });
 
-            collector.on("end", () => {
-                message.edit({ components: [] }); // remove buttons after timeout
-            });
+                collector.on("end", () => {
+                    try {
+                        message.edit({ components: [] }); // remove buttons after timeout
+                    } catch(err) {
+                        console.error(err);
+                    }
+                });
             }
 
             //-----------------download-logs----------------
