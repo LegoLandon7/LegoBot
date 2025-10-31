@@ -1,11 +1,11 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, PermissionsBitField, AuditLogEvent } from "discord.js";
 import { getLogChannel, getWelcomeChannel } from "./save-log-channels.js";
 
 const BAD_COLOR = "#ff0000";
 const MEDIUM_COLOR = "#ffff00";
 const GOOD_COLOR = "#00ff00";
 
-// logging
+// -------------------- Helper functions --------------------
 function sendToChannel(getFn, guild, content) {
     const id = getFn(guild.id);
     if (!id) return;
@@ -23,277 +23,248 @@ function welcomeMessage(guild, content) {
     sendToChannel(getWelcomeChannel, guild, content);
 }
 
-// main
-export function doLogging(client, args = null) {
-    try {
-        // delete message
-        client.on("messageDelete", async (message) => {
-            if (!message.guild || message.author?.bot) return;
+function formatMember(member) {
+    return member ? `<@${member.id}>` : "Unknown";
+}
 
-            let msg = message;
-            if (message.partial) {
-                try {
-                    msg = await message.fetch();
-                } catch {
-                    return;
-                }
-            }
+// -------------------- logging --------------------
+export function doLogging(client) {
+    // --------------- Message Delete ---------------
+    client.on("messageDelete", async (message) => {
+        if (!message.guild || message.author?.bot) return;
 
-            // embed builder
+        let msg = message;
+        if (message.partial) {
+            try { msg = await message.fetch(); } catch { return; }
+        }
+
+        const embed = new EmbedBuilder()
+            .setTitle("🗑️ Message Deleted")
+            .setColor(BAD_COLOR)
+            .setThumbnail(msg.author.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields(
+                { name: "Member", value: `${msg.author}` },
+                { name: "Channel", value: `${msg.channel}` },
+                { name: "Content", value: msg.content || "[No Text]" }
+            )
+            .setFooter({ text: `${msg.author.tag} | ${msg.author.id}` })
+            .setTimestamp();
+
+        logMessage(msg.guild, embed);
+    });
+
+    // --------------- Message Update ---------------
+    client.on("messageUpdate", async (oldMsg, newMsg) => {
+        if (!newMsg.guild || newMsg.author?.bot) return;
+        if (newMsg.partial) { try { newMsg = await newMsg.fetch(); } catch { return; } }
+
+        const embed = new EmbedBuilder()
+            .setTitle("✏️ Message Edited")
+            .setColor(MEDIUM_COLOR)
+            .setThumbnail(newMsg.author.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields(
+                { name: "Member", value: `${newMsg.author}` },
+                { name: "Channel", value: `${newMsg.channel}` },
+                { name: "Before", value: oldMsg.content || "[No Text]" },
+                { name: "After", value: newMsg.content || "[No Text]" }
+            )
+            .setFooter({ text: `${newMsg.author.tag} | ${newMsg.author.id}` })
+            .setTimestamp();
+
+        logMessage(newMsg.guild, embed);
+    });
+
+    // --------------- Guild Member Update ---------------
+    client.on("guildMemberUpdate", (oldMember, newMember) => {
+        // Nickname change
+        if (oldMember.nickname !== newMember.nickname) {
             const embed = new EmbedBuilder()
-                .setTitle("🗑️ Message Deleted")
-                .setColor(BAD_COLOR)
-                .setThumbnail(msg.author.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${msg.author}`},
-                    { name: "Channel", value: `${msg.channel}`},
-                    { name: "Content", value: msg.content || "[No Text]" }
-                )
-                .setFooter({ text: `${msg.author.tag} | ${msg.author.id}` })
-                .setTimestamp();
-
-            // log
-            logMessage(msg.guild, embed);
-        });
-
-        // update message
-        client.on("messageUpdate", async (oldMsg, newMsg) => {
-            if (!newMsg.guild || newMsg.author?.bot) return;
-
-            if (newMsg.partial) {
-                try {
-                    newMsg = await newMsg.fetch();
-                } catch {
-                    return;
-                }
-            }
-
-            // embed builder
-            const embed = new EmbedBuilder()
-                .setTitle("✏️ Message Edited")
+                .setTitle("✏️ Nickname Changed")
                 .setColor(MEDIUM_COLOR)
-                .setThumbnail(newMsg.author.displayAvatarURL({ dynamic: true, size: 128 }))
+                .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
                 .addFields(
-                    { name: "Member", value: `${newMsg.author}` },
-                    { name: "Channel", value: `${newMsg.channel}`},
-                    { name: "Before", value: oldMsg.content || "[No Text]" },
-                    { name: "After", value: newMsg.content || "[No Text]" }
+                    { name: "Member", value: formatMember(newMember) },
+                    { name: "Old Nickname", value: oldMember.nickname || "[None]" },
+                    { name: "New Nickname", value: newMember.nickname || "[None]" }
                 )
-                .setFooter({ text: `${newMsg.author.tag} | ${newMsg.author.id}` })
+                .setFooter({ text: `${newMember.user.tag} | ${newMember.user.id}` })
                 .setTimestamp();
 
-            // log
-            logMessage(newMsg.guild, embed);
-        });
+            logMessage(newMember.guild, embed);
+        }
 
-        // user changes
-        client.on("guildMemberUpdate", (oldMember, member) => {
-            // nickname change
-            if (oldMember.nickname !== member.nickname) {
+        // Role change
+        if (oldMember.roles.cache.size !== newMember.roles.cache.size) {
+            const added = newMember.roles.cache.filter(r => !oldMember.roles.cache.has(r.id));
+            const removed = oldMember.roles.cache.filter(r => !newMember.roles.cache.has(r.id));
+
+            if (added.size || removed.size) {
                 const embed = new EmbedBuilder()
-                    .setTitle("✏️ Nickname Changed")
+                    .setTitle("⚙️ Roles Updated")
                     .setColor(MEDIUM_COLOR)
-                    .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                    .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
-                        { name: "Member", value: `${member}` },
-                        { name: "Old Nickname", value: `${oldMember.nickname || "[None]"}` },
-                        { name: "New Nickname", value: `${member.nickname || "[None]"}` }
+                        { name: "Member", value: formatMember(newMember) },
+                        { name: "Added Roles", value: added.size ? added.map(r => `<@&${r.id}>`).join(" ") : "[None]" },
+                        { name: "Removed Roles", value: removed.size ? removed.map(r => `<@&${r.id}>`).join(" ") : "[None]" }
                     )
-                    .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
+                    .setFooter({ text: `${newMember.user.tag} | ${newMember.user.id}` })
                     .setTimestamp();
 
-                logMessage(member.guild, embed);
+                logMessage(newMember.guild, embed);
             }
+        }
 
-            // role change
-            if (oldMember.roles.cache.size !== member.roles.cache.size) {
-                const added = member.roles.cache.filter(r => !oldMember.roles.cache.has(r.id));
-                const removed = oldMember.roles.cache.filter(r => !member.roles.cache.has(r.id));
+        // Timeout
+        const oldTimeout = oldMember.communicationDisabledUntilTimestamp;
+        const newTimeout = newMember.communicationDisabledUntilTimestamp;
 
-                if (added.size || removed.size) {
-                    const embed = new EmbedBuilder()
-                        .setTitle("⚙️ Roles Updated")
-                        .setColor(MEDIUM_COLOR)
-                        .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                        .addFields(
-                            { name: "Member", value: `${member}` },
-                            { name: "Added Roles", value: added.size ? added.map(r => `<@&${r.id}>`).join(" ") : "[None]" },
-                            { name: "Removed Roles", value: removed.size ? removed.map(r => `<@&${r.id}>`).join(" ") : "[None]" }
-                        )
-                        .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                        .setTimestamp();
+        if ((!oldTimeout || oldTimeout <= Date.now()) && newTimeout && newTimeout > Date.now()) {
+            const embed = new EmbedBuilder()
+                .setTitle("⏳ Member Timed Out")
+                .setColor(BAD_COLOR)
+                .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields(
+                    { name: "Member", value: formatMember(newMember) },
+                    { name: "Until", value: `<t:${Math.floor(newTimeout / 1000)}:F>` }
+                )
+                .setFooter({ text: `${newMember.user.tag} | ${newMember.user.id}` })
+                .setTimestamp();
 
-                    logMessage(member.guild, embed);
-                }
-            }
+            logMessage(newMember.guild, embed);
+        } else if (oldTimeout && oldTimeout > Date.now() && (!newTimeout || newTimeout <= Date.now())) {
+            const embed = new EmbedBuilder()
+                .setTitle("✅ Timeout Removed")
+                .setColor(GOOD_COLOR)
+                .setThumbnail(newMember.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                .addFields({ name: "Member", value: formatMember(newMember) })
+                .setFooter({ text: `${newMember.user.tag} | ${newMember.user.id}` })
+                .setTimestamp();
 
-            // user timeout
-            const oldTimeout = oldMember.communicationDisabledUntilTimestamp;
-            const newTimeout = member.communicationDisabledUntilTimestamp;
+            logMessage(newMember.guild, embed);
+        }
+    });
 
-            if ((!oldTimeout || oldTimeout <= Date.now()) && newTimeout && newTimeout > Date.now()) {
+    // --------------- User Update (avatar) ---------------
+    client.on("userUpdate", async (oldUser, newUser) => {
+        if (oldUser.avatar === newUser.avatar) return;
+
+        for (const guild of client.guilds.cache.values()) {
+            const member = guild.members.cache.get(newUser.id);
+            if (!member) continue;
+
+            const embed = new EmbedBuilder()
+                .setTitle("🖼️ Avatar Updated")
+                .setColor(MEDIUM_COLOR)
+                .setDescription(`${formatMember(member)} has updated their avatar`)
+                .setImage(newUser.displayAvatarURL({ dynamic: true, size: 512 }))
+                .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
+                .setTimestamp();
+
+            logMessage(guild, embed);
+        }
+    });
+
+    // --------------- Ban / Unban ---------------
+    client.on("guildBanAdd", async (ban) => {
+        const { user, guild, reason } = ban;
+        const embed = new EmbedBuilder()
+            .setTitle("🔨 Member Banned")
+            .setColor(BAD_COLOR)
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields(
+                { name: "Member", value: `${user}` },
+                { name: "Reason", value: reason || "[No Reason Provided]" }
+            )
+            .setFooter({ text: `${user.tag} | ${user.id}` })
+            .setTimestamp();
+
+        logMessage(guild, embed);
+    });
+
+    client.on("guildBanRemove", async (ban) => {
+        const { user, guild } = ban;
+        const embed = new EmbedBuilder()
+            .setTitle("✅ Member Unbanned")
+            .setColor(GOOD_COLOR)
+            .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields({ name: "Member", value: `${user}` })
+            .setFooter({ text: `${user.tag} | ${user.id}` })
+            .setTimestamp();
+
+        logMessage(guild, embed);
+    });
+
+    // --------------- Kick / Leave ---------------
+    client.on("guildMemberRemove", async (member) => {
+        try {
+            // Check audit log for kicks
+            const logs = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick });
+            const kickEntry = logs.entries.find(e => e.target.id === member.id);
+
+            if (kickEntry) {
+                const { executor, reason } = kickEntry;
                 const embed = new EmbedBuilder()
-                    .setTitle("⏳ Member Timed Out")
+                    .setTitle("👢 Member Kicked")
                     .setColor(BAD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
-                        { name: "Member", value: `${member}` },
-                        { name: "Until", value: `<t:${Math.floor(newTimeout / 1000)}:F>` }
+                        { name: "Member", value: formatMember(member) },
+                        { name: "Executor", value: executor ? executor.tag : "[Unknown]" },
+                        { name: "Reason", value: reason || "[No Reason Provided]" }
                     )
                     .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
                     .setTimestamp();
 
                 logMessage(member.guild, embed);
-            } else if (oldTimeout && oldTimeout > Date.now() && (!newTimeout || newTimeout <= Date.now())) {
+            } else {
+                // Normal leave
                 const embed = new EmbedBuilder()
-                    .setTitle("✅ Timeout Removed")
-                    .setColor(GOOD_COLOR)
+                    .setTitle("❌ Member Left")
+                    .setColor(BAD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                    .addFields({ name: "Member", value: `${member}` })
+                    .addFields(
+                        { name: "Member", value: formatMember(member) },
+                        { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
+                        { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
+                    )
                     .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
                     .setTimestamp();
 
                 logMessage(member.guild, embed);
             }
-        });
+        } catch (err) {
+            console.error("Error logging member leave/kick:", err);
+        }
+    });
 
-        // user avatar update
-        client.on("userUpdate", async (oldUser, newUser) => {
-            if (oldUser.avatar === newUser.avatar) return;
+    // --------------- Member Join ---------------
+    client.on("guildMemberAdd", member => {
+        const log = new EmbedBuilder()
+            .setTitle("✅ Member Joined")
+            .setColor(GOOD_COLOR)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields(
+                { name: "Member", value: formatMember(member) },
+                { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
+                { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
+            )
+            .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
+            .setTimestamp();
 
-            for (const [guildId, guild] of client.guilds.cache) {
-                const member = guild.members.cache.get(newUser.id);
-                if (!member) continue;
+        logMessage(member.guild, log);
 
-                const embed = new EmbedBuilder()
-                    .setTitle("🖼️ Avatar Updated")
-                    .setColor(MEDIUM_COLOR)
-                    .setDescription(`${member} has updated their avatar`)
-                    .setImage(member.displayAvatarURL({ dynamic: true, size: 512 }))
-                    .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                    .setTimestamp();
+        const welcome = new EmbedBuilder()
+            .setTitle("✅ Member Joined")
+            .setColor(GOOD_COLOR)
+            .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+            .addFields(
+                { name: "Member", value: formatMember(member) },
+                { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
+            )
+            .setFooter({ text: member.user.tag })
+            .setTimestamp();
 
-                logMessage(guild, embed);
-            }
-        });
-
-        // user ban
-        client.on("guildBanAdd", async (ban) => {
-            const { user, guild } = ban;
-
-            const embed = new EmbedBuilder()
-                .setTitle("🔨 Member Banned")
-                .setColor(BAD_COLOR)
-                .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${user}` },
-                    { name: "Reason", value: ban.reason || "[No Reason Provided]" }
-                )
-                .setFooter({ text: `${user.tag} | ${user.id}` })
-                .setTimestamp();
-
-            logMessage(guild, embed);
-        });
-
-        // user unban
-        client.on("guildBanRemove", async (ban) => {
-            const { user, guild } = ban;
-
-            const embed = new EmbedBuilder()
-                .setTitle("✅ Member Unbanned")
-                .setColor(GOOD_COLOR)
-                .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields({ name: "Member", value: `${user}` })
-                .setFooter({ text: `${user.tag} | ${user.id}` })
-                .setTimestamp();
-
-            logMessage(guild, embed);
-        });
-
-        // user kick
-        client.on("guildMemberRemove", async (member) => {
-            const fetchedLogs = await member.guild.fetchAuditLogs({ limit: 1, type: 20 });
-            const kickLog = fetchedLogs.entries.first();
-            if (!kickLog) return;
-
-            const { executor, target, reason } = kickLog;
-            if (target.id !== member.id) return;
-
-            const embed = new EmbedBuilder()
-                .setTitle("👢 Member Kicked")
-                .setColor(BAD_COLOR)
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${member}` },
-                    { name: "Executor", value: executor ? executor.tag : "[Unknown]" },
-                    { name: "Reason", value: reason || "[No Reason Provided]" }
-                )
-                .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                .setTimestamp();
-
-            logMessage(member.guild, embed);
-        });
-
-        // user join
-        client.on("guildMemberAdd", member => {
-            const log = new EmbedBuilder()
-                .setTitle("✅ Member Joined")
-                .setColor(GOOD_COLOR)
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${member}` },
-                    { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
-                    { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
-                )
-                .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                .setTimestamp();
-
-            logMessage(member.guild, log);
-
-            const welcome = new EmbedBuilder()
-                .setTitle("✅ Member Joined")
-                .setColor(GOOD_COLOR)
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${member}` },
-                    { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
-                )
-                .setFooter({ text: member.user.tag })
-                .setTimestamp();
-
-            welcomeMessage(member.guild, welcome);
-        });
-
-        // user leave
-        client.on("guildMemberRemove", member => {
-            const log = new EmbedBuilder()
-                .setTitle("❌ Member Left")
-                .setColor(BAD_COLOR)
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${member}`},
-                    { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
-                    { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
-                )
-                .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                .setTimestamp();
-
-            logMessage(member.guild, log);
-
-            const welcome = new EmbedBuilder()
-                .setTitle("❌ Member Left")
-                .setColor(BAD_COLOR)
-                .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                .addFields(
-                    { name: "Member", value: `${member}`},
-                    { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
-                )
-                .setFooter({text: member.user.tag})
-                .setTimestamp();
-
-            welcomeMessage(member.guild, welcome);
-        });
-    } catch (err) {
-        console.error(err);
-    }
+        welcomeMessage(member.guild, welcome);
+    });
 }

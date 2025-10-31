@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { PermissionsBitField } from "discord.js";
 
 // convert duration strings
 export function parseDuration(duration) {
@@ -14,6 +15,40 @@ export function parseDuration(duration) {
 		case "d": return amount * 24 * 60 * 60 * 1000;
 		default: return null;
 	}
+}
+
+// fetch user
+export async function fetchUser(msg, input) {
+    if (!input) return null;
+
+    // Remove mention formatting
+    input = input.replace(/^<@!?(\d+)>$/, "$1");
+
+    let user = null;
+
+    // 1. Try fetching as guild member
+    try {
+        const member = await msg.guild.members.fetch(input).catch(() => null);
+        if (member) return member.user;
+    } catch {}
+
+    // 2. Try fetching from banned users
+    try {
+        const bans = await msg.guild.bans.fetch();
+        const banned = bans.find(b => 
+            b.user.id === input || 
+            b.user.tag.toLowerCase() === input.toLowerCase()
+        );
+        if (banned) return banned.user;
+    } catch {}
+
+    // 3. Try fetching from global users by ID
+    try {
+        user = await msg.client.users.fetch(input);
+        if (user) return user;
+    } catch {}
+
+    return null;
 }
 
 // fetch member
