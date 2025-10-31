@@ -1,28 +1,12 @@
 import { EmbedBuilder, PermissionsBitField } from "discord.js";
-import { getLogChannel, getWelcomeChannel } from "./save-log-channels.js";
+import { getLogChannel, getWelcomeChannel } from "../functions/save-log-channels.js";
+import { sendToChannel, logMessage, welcomeMessage, formatMember } from "../functions/logging.js";
 
 const BAD_COLOR = "#ff0000";
 const MEDIUM_COLOR = "#ffff00";
 const GOOD_COLOR = "#00ff00";
 
-// Send to a channel, using a getter function
-function sendToChannel(getFn, guild, content) {
-    try {
-        const id = getFn(guild.id);
-        if (!id) return;
-        const channel = guild.channels.cache.get(id);
-        if (!channel) return;
-        const payload = content instanceof EmbedBuilder ? { embeds: [content] } : content;
-        channel.send(payload).catch(() => {});
-    } catch (err) {
-        console.error("sendToChannel error:", err);
-    }
-}
-
-function logMessage(guild, content) { sendToChannel(getLogChannel, guild, content); }
-function welcomeMessage(guild, content) { sendToChannel(getWelcomeChannel, guild, content); }
-function formatMember(member) { return member ? `<@${member.id}>` : "Unknown"; }
-
+// logging
 export function doLogging(client) {
     try {
         // ----------------- Message Delete -----------------
@@ -216,7 +200,7 @@ export function doLogging(client) {
                 // logging
                 const embed1 = new EmbedBuilder()
                     .setTitle("✅ Member Joined")
-                    .setColor(BAD_COLOR)
+                    .setColor(GOOD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
                         { name: "Member", value: formatMember(member) },
@@ -232,7 +216,7 @@ export function doLogging(client) {
                 // welcome
                 const embed2 = new EmbedBuilder()
                     .setTitle("✅ Member Joined")
-                    .setColor(BAD_COLOR)
+                    .setColor(GOOD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
                         { name: "Member", value: formatMember(member) },
@@ -247,7 +231,7 @@ export function doLogging(client) {
             }
         });
 
-    } catch (err) {
+    } catch (err) { // global error
         console.error("doLogging initialization error:", err);
     }
 }

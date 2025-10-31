@@ -1,5 +1,5 @@
 import { EmbedBuilder } from "discord.js";
-import { getTriggers, addTrigger, removeTrigger } from "./save-trigger.js";
+import { getTriggers, addTrigger, removeTrigger } from "../functions/save-trigger.js";
 import { PREFIX } from "../commands/commands.js";
 
 // triggers

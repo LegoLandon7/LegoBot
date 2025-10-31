@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } from "discord.js";
 import { parseDuration,  fetchMember, fetchUser, getFolderSize} from "../functions/utilities.js";
-import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../logging/save-log-channels.js";
-import { addTrigger, removeTrigger, getTriggers } from "../triggers/save-trigger.js";
+import { getLogChannel, setLogChannel, getWelcomeChannel, setWelcomeChannel } from "../functions/save-log-channels.js";
+import { addTrigger, removeTrigger, getTriggers } from "../functions/save-trigger.js";
 import { doLogging } from "../logging/logger.js";
 
 export const PREFIX = "$";
@@ -548,22 +548,24 @@ export function doCommands(client) {
             //-----------------ban----------------
             if (command === `${PREFIX}ban`) {
                 try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.BanMembers)) 
+                        return msg.reply("❌ You don't have permission to ban members");
+                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers)) 
+                        return msg.reply("❌ I don't have permission to ban members");
                     const user = await fetchUser(msg, args[0]?.trim() || null);
                     if (!user) return msg.reply("❌ Could not find that user");
 
                     // get member in guild if available
                     const member = msg.guild.members.cache.get(user.id) || null;
 
+                    // check if can ban
                     if (user.bot) return msg.reply("❌ Can't ban a bot");
                     if (user.id === msg.author.id) return msg.reply("❌ You cannot ban yourself");
                     if (member && member.roles.highest.position >= msg.member.roles.highest.position)
                         return msg.reply("❌ You cannot ban this member due to role hierarchy");
 
-                    if (!msg.member.permissions.has(PermissionsBitField.Flags.BanMembers)) 
-                        return msg.reply("❌ You don't have permission to ban members");
-                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers)) 
-                        return msg.reply("❌ I don't have permission to ban members");
-
+                    // ban
                     let reason = args.slice(1).join(" ") || "No reason provided";
                     if (user) await user.send(`You have been banned from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
                     await msg.guild.bans.create(user.id, { reason });
@@ -577,20 +579,24 @@ export function doCommands(client) {
             //-----------------unban----------------
             if (command === `${PREFIX}unban`) {
                 try {
-                    const user = await fetchUser(msg, args[0]?.trim() || null);
-                    if (!user) return msg.reply("❌ Could not find that user");
-
-                    if (user.bot) return msg.reply("❌ Can't unban a bot");
-
+                    // permissions
                     if (!msg.member.permissions.has(PermissionsBitField.Flags.BanMembers)) 
                         return msg.reply("❌ You don't have permission to unban members");
                     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.BanMembers)) 
                         return msg.reply("❌ I don't have permission to unban members");
 
+                    // get user
+                    const user = await fetchUser(msg, args[0]?.trim() || null);
+                    if (!user) return msg.reply("❌ Could not find that user");
+
+                    // check if can unban
+                    if (user.bot) return msg.reply("❌ Can't unban a bot");
+
                     const bans = await msg.guild.bans.fetch();
                     const ban = bans.get(user.id);
                     if (!ban) return msg.reply("❌ That user is not banned");
 
+                    // unban
                     let reason = args.slice(1).join(" ") || "No reason provided";
                     await msg.guild.bans.remove(user.id, reason);
                     if (user) await user.send(`You have been unbanned from **${msg.guild.name}**`).catch(() => {});
@@ -604,9 +610,17 @@ export function doCommands(client) {
             //-----------------kick----------------
             if (command === `${PREFIX}kick`) {
                 try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.KickMembers)) 
+                        return msg.reply("❌ You don't have permission to kick members");
+                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.KickMembers)) 
+                        return msg.reply("❌ I don't have permission to kick members");
+
+                    // get user
                     const user = await fetchUser(msg, args[0]?.trim() || null);
                     if (!user) return msg.reply("❌ Could not find that user");
 
+                    // check if can kick
                     const member = msg.guild.members.cache.get(user.id);
                     if (!member) return msg.reply("❌ User is not in this server");
 
@@ -615,11 +629,7 @@ export function doCommands(client) {
                     if (member.roles.highest.position >= msg.member.roles.highest.position)
                         return msg.reply("❌ You cannot kick this member due to role hierarchy");
 
-                    if (!msg.member.permissions.has(PermissionsBitField.Flags.KickMembers)) 
-                        return msg.reply("❌ You don't have permission to kick members");
-                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.KickMembers)) 
-                        return msg.reply("❌ I don't have permission to kick members");
-
+                    // kick
                     let reason = args.slice(1).join(" ") || "No reason provided";
                     await member.send(`You have been kicked from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
                     await member.kick(reason);
@@ -633,24 +643,29 @@ export function doCommands(client) {
             //-----------------timeout----------------
             if (command === `${PREFIX}timeout`) {
                 try {
-                    const user = await fetchUser(msg, args[0]?.trim() || null);
-                    if (!user) return msg.reply("❌ Could not find that user");
-
-                    const member = msg.guild.members.cache.get(user.id);
-                    if (!member) return msg.reply("❌ User is not in this server");
-
-                    if (user.bot) return msg.reply("❌ Can't time out a bot");
-                    if (user.id === msg.author.id) return msg.reply("❌ You cannot timeout yourself");
-                    if (member.roles.highest.position >= msg.member.roles.highest.position)
-                        return msg.reply("❌ You cannot timeout this member due to role hierarchy");
-                    if (member.communicationDisabledUntilTimestamp && member.communicationDisabledUntilTimestamp > Date.now())
-                        return msg.reply("❌ This user is already timed out");
-
+                    // permissions
                     if (!msg.member.permissions.has(PermissionsBitField.Flags.ModerateMembers)) 
                         return msg.reply("❌ You don't have permission to timeout members");
                     if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ModerateMembers)) 
                         return msg.reply("❌ I don't have permission to timeout members");
 
+                    // get user
+                    const user = await fetchUser(msg, args[0]?.trim() || null);
+                    if (!user) return msg.reply("❌ Could not find that user");
+
+                    // check if can timeout
+                    const member = msg.guild.members.cache.get(user.id);
+                    if (!member) return msg.reply("❌ User is not in this server");
+
+                    if (user.bot) return msg.reply("❌ Can't time out a bot");
+                    if (user.id === msg.author.id) return msg.reply("❌ You cannot timeout yourself");
+
+                    if (member.roles.highest.position >= msg.member.roles.highest.position)
+                        return msg.reply("❌ You cannot timeout this member due to role hierarchy");
+                    if (member.communicationDisabledUntilTimestamp && member.communicationDisabledUntilTimestamp > Date.now())
+                        return msg.reply("❌ This user is already timed out");
+
+                    // timeout
                     let duration = parseDuration(args[1]);
                     if (!duration) return msg.reply("❌ Invalid duration. Use formats like 10m, 2h, 1d");
                     let reason = args.slice(2).join(" ") || "No reason provided";
@@ -667,12 +682,20 @@ export function doCommands(client) {
             //-----------------untimeout----------------
             if (command === `${PREFIX}untimeout`) {
                 try {
+                    // permissions
+                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMembers)) 
+                        return msg.reply("❌ You don't have permission to untimeout members");
+                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMembers)) 
+                        return msg.reply("❌ I don't have permission to untimeout members");
+
+                    // get user
                     const user = await fetchUser(msg, args[0]?.trim() || null);
                     if (!user) return msg.reply("❌ Could not find that user");
 
                     const member = msg.guild.members.cache.get(user.id);
                     if (!member) return msg.reply("❌ User is not in this server");
 
+                    // check if can untimeout
                     if (user.bot) return msg.reply("❌ Can't untime out a bot");
                     if (user.id === msg.author.id) return msg.reply("❌ You cannot untimeout yourself");
                     if (member.roles.highest.position >= msg.member.roles.highest.position)
@@ -680,11 +703,7 @@ export function doCommands(client) {
                     if (!member.communicationDisabledUntilTimestamp || member.communicationDisabledUntilTimestamp <= Date.now())
                         return msg.reply("❌ This user is not currently timed out");
 
-                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageMembers)) 
-                        return msg.reply("❌ You don't have permission to untimeout members");
-                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageMembers)) 
-                        return msg.reply("❌ I don't have permission to untimeout members");
-
+                    // untime out
                     await member.send(`You have been untimed out from **${msg.guild.name}**`).catch(() => {});
                     await member.timeout(null, "Timeout removed by moderator");
                     msg.reply(`✅ Untimed out ${user.tag}`);
@@ -696,15 +715,21 @@ export function doCommands(client) {
 
             //-----------------set-nick----------------
             if (command === `${PREFIX}set-nick`) {
+                // permissions
+                if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageNicknames)) 
+                        return msg.reply("❌ You don't have permission to change the nickname of members");
+                if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageNicknames)) 
+                        return msg.reply("❌ I don't have permission to change the nickname of members");
+
                 let member;
                 let nick;
 
-                // Case 1: first arg is a mention or ID → target member
+                // first arg is a mention or ID → target member
                 if (args[0]?.match(/^<@!?(\d+)>$/) || /^\d+$/.test(args[0])) {
                         member = await fetchMember(msg, args[0]);
                         nick = args.slice(1).join(" "); // rest is nickname (or empty to reset)
                 } else {
-                        // Case 2: no mention → default to author, all args = nickname
+                        // no mention → default to author, all args = nickname
                         member = msg.member;
                         nick = args.join(" "); // full args are the nickname
                 }
@@ -714,11 +739,6 @@ export function doCommands(client) {
                 // check if nickname can be changed
                 if (member.roles.highest.position >= msg.member.roles.highest.position && member.id !== msg.author.id) 
                         return msg.reply(`❌ You cannot change the nickname of this member due to role hierarchy`);
-
-                if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageNicknames)) 
-                        return msg.reply("❌ You don't have permission to change the nickname of members");
-                if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageNicknames)) 
-                        return msg.reply("❌ I don't have permission to change the nickname of members");
 
                 // apply nickname
                 try {
@@ -737,59 +757,58 @@ export function doCommands(client) {
 
             //-----------------role----------------
             if (command === `${PREFIX}role`) {
-                    let member;
-                    let roleInput;
+                // check permissions
+                if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageRoles))
+                        return msg.reply("❌ You don't have permission to manage roles");
+                if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles))
+                        return msg.reply("❌ I don't have permission to manage roles");
 
-                    // if first arg is a mention or ID, treat as member
-                    if (args[0]?.match(/^<@!?(\d+)>$/) || /^\d+$/.test(args[0])) {
-                            member = await fetchMember(msg, args[0]);
-                            roleInput = args.slice(1).join(" ");
-                    } else {
-                            // default to author, all args are role name
-                            member = msg.member;
-                            roleInput = args.join(" ");
-                    }
+                let member;
+                let roleInput;
 
-                    if (!member) return msg.reply("❌ Could not find that user");
-                    if (!roleInput) return msg.reply("❌ You need to specify a role");
+                // if first arg is a mention or ID, treat as member
+                if (args[0]?.match(/^<@!?(\d+)>$/) || /^\d+$/.test(args[0])) {
+                        member = await fetchMember(msg, args[0]);
+                        roleInput = args.slice(1).join(" ");
+                } else {
+                        // default to author, all args are role name
+                        member = msg.member;
+                        roleInput = args.join(" ");
+                }
 
-                    // fetch role
-                    let role;
-                    const roleMention = msg.mentions.roles.first();
-                    if (roleMention) {role = roleMention;} else {role = msg.guild.roles.cache.find(r => r.name.toLowerCase() === roleInput.toLowerCase());}
-                    if (!role) return msg.reply("❌ Could not find that role");
+                if (!member) return msg.reply("❌ Could not find that user");
+                if (!roleInput) return msg.reply("❌ You need to specify a role");
 
-                    // check role hierarchy
-                    if (member.roles.highest.position >= msg.member.roles.highest.position && member.id !== msg.author.id)
-                            return msg.reply("❌ You cannot change the roles of this member due to role hierarchy");
-                    if (role.position >= msg.guild.members.me.roles.highest.position)
-                            return msg.reply("❌ I cannot manage a role higher than or equal to my highest role");
+                // fetch role
+                let role;
+                const roleMention = msg.mentions.roles.first();
+                if (roleMention) {role = roleMention;} else {role = msg.guild.roles.cache.find(r => r.name.toLowerCase() === roleInput.toLowerCase());}
+                if (!role) return msg.reply("❌ Could not find that role");
 
-                    // check permissions
-                    if (!msg.member.permissions.has(PermissionsBitField.Flags.ManageRoles))
-                            return msg.reply("❌ You don't have permission to manage roles");
-                    if (!msg.guild.members.me.permissions.has(PermissionsBitField.Flags.ManageRoles))
-                            return msg.reply("❌ I don't have permission to manage roles");
-
-                    // add or remove role
-                    if (member.roles.cache.has(role.id)) {
-                            try {
-                                    await member.roles.remove(role); // remove role
-                                    msg.reply(`✅ Removed role **${role.name}** from ${member.user.tag}`);
-                            } catch (err) {
-                                    console.error("Failed to remove role:", err);
-                                    msg.reply("❌ Failed to remove the role. Check my permissions and role hierarchy.");
-                            }
-                    } else {
-                            try {
-                                    await member.roles.add(role); // add role
-                                    msg.reply(`✅ Added role **${role.name}** to ${member.user.tag}`);
-                            } catch (err) {
-                                    console.error("Failed to add role:", err);
-                                    msg.reply("❌ Failed to add the role. Check my permissions and role hierarchy.");
-                            }
-                    }
-            }3
+                // check role hierarchy
+                if (member.roles.highest.position >= msg.member.roles.highest.position && member.id !== msg.author.id)
+                        return msg.reply("❌ You cannot change the roles of this member due to role hierarchy");
+                if (role.position >= msg.guild.members.me.roles.highest.position)
+                        return msg.reply("❌ I cannot manage a role higher than or equal to my highest role");
+                // add or remove role
+                if (member.roles.cache.has(role.id)) {
+                        try {
+                                await member.roles.remove(role); // remove role
+                                msg.reply(`✅ Removed role **${role.name}** from ${member.user.tag}`);
+                        } catch (err) {
+                                console.error("Failed to remove role:", err);
+                                msg.reply("❌ Failed to remove the role. Check my permissions and role hierarchy.");
+                        }
+                } else {
+                        try {
+                                await member.roles.add(role); // add role
+                                msg.reply(`✅ Added role **${role.name}** to ${member.user.tag}`);
+                        } catch (err) {
+                                console.error("Failed to add role:", err);
+                                msg.reply("❌ Failed to add the role. Check my permissions and role hierarchy.");
+                        }
+                }
+            }
 
             //-----------------purge----------------
             if (command === `${PREFIX}purge`) {

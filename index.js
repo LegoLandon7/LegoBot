@@ -1,8 +1,8 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder, Partials } from "discord.js";
 import { parseDuration,  fetchMember} from "./functions/utilities.js";
 import { doLogging } from "./logging/logger.js";
-import { setLogChannel, getLogChannel } from "./logging/save-log-channels.js";
-import { addTrigger, getTriggers } from "./triggers/save-trigger.js";
+import { setLogChannel } from "./functions/save-log-channels.js";
+import { addTrigger, getTriggers } from "./functions/save-trigger.js";
 import { doCommands } from "./commands/commands.js";
 import { doTriggers } from "./triggers/triggers.js";
 import dotenv from "dotenv";
