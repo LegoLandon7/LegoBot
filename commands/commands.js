@@ -399,31 +399,31 @@ export function doCommands(client) {
 
             //-----------------echo----------------
             if (command === `${PREFIX}echo`) {
-            // Case 1: first arg is a channel mention → send there
-            let targetChannel;
-            let text;
-            
-            const channelMention = msg.mentions.channels.first();
-            if (channelMention) {
-                targetChannel = channelMention;
-                text = args.slice(1).join(" "); // rest is the text
-            } else {
-                // default to current channel, all args = text
-                targetChannel = msg.channel;
-                text = args.join(" ");
-            }
+                // first arg is a channel mention
+                let targetChannel;
+                let text;
+                
+                const channelMention = msg.mentions.channels.first();
+                if (channelMention) {
+                    targetChannel = channelMention;
+                    text = args.slice(1).join(" "); // rest is the text
+                } else {
+                    // default to current channel, all args = text
+                    targetChannel = msg.channel;
+                    text = args.join(" ");
+                }
 
-            if (!text) return msg.reply("❌ You need to provide something to echo.");
+                if (!text) return msg.reply("❌ You need to provide something to echo.");
 
-            try {
+                try {
                     // send message
                     await msg.delete().catch(() => {});
                     await targetChannel.send(text);
-            } catch (err) {
+                } catch (err) {
                     console.error("Failed to echo message:", err);
                     msg.reply("❌ Could not send message. Make sure I have permission to send messages in that channel.");
+                }
             }
-            }	
 
             //-----------------user-info----------------
             if (command === `${PREFIX}user-info`) {
@@ -730,7 +730,6 @@ export function doCommands(client) {
                         nick = args.slice(1).join(" "); // rest is nickname (or empty to reset)
                 } else {
                         // no mention → default to author, all args = nickname
-                        member = msg.member;
                         nick = args.join(" "); // full args are the nickname
                 }
 
@@ -751,7 +750,7 @@ export function doCommands(client) {
                     }
                 } catch (err) {
                     console.error("Failed to change nickname:", err);
-                    msg.reply(`❌ I couldn't change the nickname. Make sure my role is above the member's role and I have Manage Nicknames permission`);
+                    msg.reply("❌ I couldn't change the nickname" + member);
                 }
             }
 
@@ -776,8 +775,8 @@ export function doCommands(client) {
                         roleInput = args.join(" ");
                 }
 
-                if (!member) return msg.reply("❌ Could not find that user");
                 if (!roleInput) return msg.reply("❌ You need to specify a role");
+                if (!member) return msg.reply("❌ Could not find that user");
 
                 // fetch role
                 let role;
