@@ -1,10 +1,11 @@
-import { EmbedBuilder, AuditLogEvent } from "discord.js";
+import { EmbedBuilder, PermissionsBitField } from "discord.js";
 import { getLogChannel, getWelcomeChannel } from "./save-log-channels.js";
 
 const BAD_COLOR = "#ff0000";
 const MEDIUM_COLOR = "#ffff00";
 const GOOD_COLOR = "#00ff00";
 
+// Send to a channel, using a getter function
 function sendToChannel(getFn, guild, content) {
     try {
         const id = getFn(guild.id);
@@ -29,7 +30,9 @@ export function doLogging(client) {
             try {
                 if (!message.guild || message.author?.bot) return;
                 let msg = message;
-                if (message.partial) { try { msg = await message.fetch(); } catch { return; } }
+                if (message.partial) {
+                    try { msg = await message.fetch(); } catch { return; }
+                }
 
                 const embed = new EmbedBuilder()
                     .setTitle("🗑️ Message Deleted")
@@ -53,7 +56,9 @@ export function doLogging(client) {
         client.on("messageUpdate", async (oldMsg, newMsg) => {
             try {
                 if (!newMsg.guild || newMsg.author?.bot) return;
-                if (newMsg.partial) { try { newMsg = await newMsg.fetch(); } catch { return; } }
+                if (newMsg.partial) {
+                    try { newMsg = await newMsg.fetch(); } catch { return; }
+                }
 
                 const embed = new EmbedBuilder()
                     .setTitle("✏️ Message Edited")
@@ -67,6 +72,7 @@ export function doLogging(client) {
                     )
                     .setFooter({ text: `${newMsg.author.tag} | ${newMsg.author.id}` })
                     .setTimestamp();
+
                 logMessage(newMsg.guild, embed);
             } catch (err) {
                 console.error("messageUpdate logging error:", err);
@@ -92,7 +98,7 @@ export function doLogging(client) {
                     logMessage(newMember.guild, embed);
                 }
 
-                // Role change
+                // Role changes
                 if (oldMember.roles.cache.size !== newMember.roles.cache.size) {
                     const added = newMember.roles.cache.filter(r => !oldMember.roles.cache.has(r.id));
                     const removed = oldMember.roles.cache.filter(r => !newMember.roles.cache.has(r.id));
@@ -113,7 +119,7 @@ export function doLogging(client) {
                     }
                 }
 
-                // Timeout
+                // Timeout / Untimeout
                 const oldTimeout = oldMember.communicationDisabledUntilTimestamp;
                 const newTimeout = newMember.communicationDisabledUntilTimestamp;
 
@@ -144,7 +150,7 @@ export function doLogging(client) {
             }
         });
 
-        // ----------------- User Update (avatar) -----------------
+        // ----------------- User Avatar Update -----------------
         client.on("userUpdate", async (oldUser, newUser) => {
             try {
                 if (oldUser.avatar === newUser.avatar) return;
@@ -160,7 +166,6 @@ export function doLogging(client) {
                         .setImage(newUser.displayAvatarURL({ dynamic: true, size: 512 }))
                         .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
                         .setTimestamp();
-
                     logMessage(guild, embed);
                 }
             } catch (err) {
@@ -168,114 +173,80 @@ export function doLogging(client) {
             }
         });
 
-        // ----------------- Bans -----------------
-        client.on("guildBanAdd", async (ban) => {
-            try {
-                const { user, guild, reason } = ban;
-                const embed = new EmbedBuilder()
-                    .setTitle("🔨 Member Banned")
-                    .setColor(BAD_COLOR)
-                    .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
-                    .addFields(
-                        { name: "Member", value: `${user}` },
-                        { name: "Reason", value: reason || "[No Reason Provided]" }
-                    )
-                    .setFooter({ text: `${user.tag} | ${user.id}` })
-                    .setTimestamp();
-
-                logMessage(guild, embed);
-            } catch (err) {
-                console.error("guildBanAdd logging error:", err);
-            }
-        });
-
-        client.on("guildBanRemove", async (ban) => {
-            try {
-                const { user, guild } = ban;
-                const embed = new EmbedBuilder()
-                    .setTitle("✅ Member Unbanned")
-                    .setColor(GOOD_COLOR)
-                    .setThumbnail(user.displayAvatarURL({ dynamic: true, size: 128 }))
-                    .addFields({ name: "Member", value: `${user}` })
-                    .setFooter({ text: `${user.tag} | ${user.id}` })
-                    .setTimestamp();
-
-                logMessage(guild, embed);
-            } catch (err) {
-                console.error("guildBanRemove logging error:", err);
-            }
-        });
-
-        // ----------------- Kicks / Leaves -----------------
+        // ----------------- Guild Member Remove -----------------
         client.on("guildMemberRemove", async (member) => {
             try {
-                const logs = await member.guild.fetchAuditLogs({ limit: 5, type: AuditLogEvent.MemberKick });
-                const kickEntry = logs.entries.find(e => e.target.id === member.id);
+                // logging
+                const embed1 = new EmbedBuilder()
+                    .setTitle("❌ Member Left")
+                    .setColor(BAD_COLOR)
+                    .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                    .addFields(
+                        { name: "Member", value: formatMember(member) },
+                        { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
+                        { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
+                    )
+                    .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
+                    .setTimestamp();
 
-                if (kickEntry) {
-                    const { executor, reason } = kickEntry;
-                    const embed = new EmbedBuilder()
-                        .setTitle("👢 Member Kicked")
-                        .setColor(BAD_COLOR)
-                        .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                        .addFields(
-                            { name: "Member", value: formatMember(member) },
-                            { name: "Executor", value: executor ? executor.tag : "[Unknown]" },
-                            { name: "Reason", value: reason || "[No Reason Provided]" }
-                        )
-                        .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                        .setTimestamp();
-                    logMessage(member.guild, embed);
-                } else {
-                    const embed = new EmbedBuilder()
-                        .setTitle("❌ Member Left")
-                        .setColor(BAD_COLOR)
-                        .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
-                        .addFields(
-                            { name: "Member", value: formatMember(member) },
-                            { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
-                            { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
-                        )
-                        .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
-                        .setTimestamp();
-                    logMessage(member.guild, embed);
-                }
+
+                logMessage(member.guild, embed1);
+
+                // welcome
+                const embed2 = new EmbedBuilder()
+                    .setTitle("❌ Member Left")
+                    .setColor(BAD_COLOR)
+                    .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
+                    .addFields(
+                        { name: "Member", value: formatMember(member) },
+                        { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
+                    )
+                    .setFooter({ text: `${member.user.tag}` })
+                    .setTimestamp();
+
+                welcomeMessage(member.guild, embed2);
             } catch (err) {
                 console.error("guildMemberRemove logging error:", err);
             }
         });
 
-        // ----------------- Member Join -----------------
+        // ----------------- Guild Member Add -----------------
         client.on("guildMemberAdd", (member) => {
             try {
-                const log = new EmbedBuilder()
+                // logging
+                const embed1 = new EmbedBuilder()
                     .setTitle("✅ Member Joined")
-                    .setColor(GOOD_COLOR)
+                    .setColor(BAD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
                         { name: "Member", value: formatMember(member) },
                         { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:F>` },
-                        { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
+                        { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
                     )
                     .setFooter({ text: `${member.user.tag} | ${member.user.id}` })
                     .setTimestamp();
-                logMessage(member.guild, log);
 
-                const welcome = new EmbedBuilder()
+
+                logMessage(member.guild, embed1);
+
+                // welcome
+                const embed2 = new EmbedBuilder()
                     .setTitle("✅ Member Joined")
-                    .setColor(GOOD_COLOR)
+                    .setColor(BAD_COLOR)
                     .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 128 }))
                     .addFields(
                         { name: "Member", value: formatMember(member) },
-                        { name: "Joined Server", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` }
+                        { name: "Joined Server", value: member.joinedTimestamp ? `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>` : "Unknown" }
                     )
-                    .setFooter({ text: member.user.tag })
+                    .setFooter({ text: `${member.user.tag}` })
                     .setTimestamp();
-                welcomeMessage(member.guild, welcome);
+
+                welcomeMessage(member.guild, embed2);
             } catch (err) {
                 console.error("guildMemberAdd logging error:", err);
             }
         });
+
     } catch (err) {
         console.error("doLogging initialization error:", err);
     }

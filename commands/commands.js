@@ -565,7 +565,7 @@ export function doCommands(client) {
                         return msg.reply("❌ I don't have permission to ban members");
 
                     let reason = args.slice(1).join(" ") || "No reason provided";
-                    if (member) await member.send(`You have been banned from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
+                    if (user) await user.send(`You have been banned from **${msg.guild.name}** because:\n${reason}`).catch(() => {});
                     await msg.guild.bans.create(user.id, { reason });
                     msg.reply(`✅ Banned ${user.tag} | Reason: ${reason}`);
                 } catch (err) {
@@ -593,6 +593,7 @@ export function doCommands(client) {
 
                     let reason = args.slice(1).join(" ") || "No reason provided";
                     await msg.guild.bans.remove(user.id, reason);
+                    if (user) await user.send(`You have been unbanned from **${msg.guild.name}**`).catch(() => {});
                     msg.reply(`✅ Unbanned ${user.tag} | Reason: ${reason}`);
                 } catch (err) {
                     console.error(err);
