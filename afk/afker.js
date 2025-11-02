@@ -1,13 +1,13 @@
 import fs from "fs";
 import { getTimeAgo } from "../functions/utilities.js";
-import { PREFIX } from "../commands/commands.js";
+import { PREFIX } from "../commands/main-commands.js";
 
 const filePath = "afk/afk-users.json";
 
 // ensure file exists
 if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, "{}");
 
-// handle AFK mentions + remove on message
+// do afk stuff
 export function doAfk(client) {
     client.on("messageCreate", async (message) => {
         try {
@@ -31,6 +31,14 @@ export function doAfk(client) {
             if (isAfk(message.author)) {
                 removeAfk(message.author);
                 await message.reply("✅ Welcome back! Your AFK status has been removed");
+            }
+
+            // afk command
+            if (command === `${PREFIX}afk`) {
+                if (isAfk(message.author)) return;
+                const reason = args.join(" ") || "No reason provided.";
+                goAfk(message.author, reason);
+                return message.reply(`💤 You are now marked as AFK: **${reason}**`);
             }
 
         } catch (err) {

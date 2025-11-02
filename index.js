@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder, Partials } from "discord.js";
 import { doLogging } from "./logging/logger.js";
-import { doCommands } from "./commands/commands.js";
+import { doCommands } from "./commands/main-commands.js";
 import { doTriggers } from "./triggers/triggers.js";
 import { doAfk } from "./afk/afker.js";
 import dotenv from "dotenv";

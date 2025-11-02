@@ -6,3 +6,4 @@ triggers/triggers.json
 logging/purge-logs/
 logging/logs/
 afk/afk-users.json
+locking/locked-channels.json
