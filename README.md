@@ -1,4 +1,10 @@
 # LegoBot
+-- CURRENT --
+
+I plan to do a super-clean of the code to make it more readable, easier to understand, and overall better. this will include more files, directories, methods, better commenting, imports, and everything else
+
+I also plan to add a fun command file for fun commands! these commands can be dumb games to little functions
+
 -- INFO --
 
 this bot is made by me 'cc_landonlego' however ive used chatgpt for a lot of help on this mainly as a learning tool
