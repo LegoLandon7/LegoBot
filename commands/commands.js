@@ -59,7 +59,7 @@ export function doCommands(client) {
                         { name: "help [page]", value: "Shows this menu of commands" },
                         { name: "bot-info", value: "Shows info about the bot" },
                         { name: "ping", value: "Gets the ping of the bot" },
-                        { name: "afk", value: "Go afk" }
+                        { name: "afk [reason] ", value: "Go afk" }
                     )
                     .setFooter({ text: EMBED_DESC })
                     .setTimestamp();
@@ -99,7 +99,9 @@ export function doCommands(client) {
                         { name: "set-nick [user] [nickname]", value: "Changes nickname of a user" },
                         { name: "role [user] [role]", value: "Changes role of a user" },
                         { name: "purge [amount]", value: "Purges messages" },
-                        { name: "echo [channel] [text]", value: "Echos a message in a channel" }
+                        { name: "echo [channel] [text]", value: "Echos a message in a channel" },
+                        { name: "lock", value: "Locks / unlocks this channel" },
+                        { name: "lock-server", value: "Locks / unlocks server" }
                     )
                     .setFooter({ text: EMBED_DESC });
 
