@@ -2,6 +2,7 @@ import { Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, ActionRow
 import { doLogging } from "./logging/logger.js";
 import { doCommands } from "./commands/commands.js";
 import { doTriggers } from "./triggers/triggers.js";
+import { doAfk } from "./afk/afker.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -32,6 +33,9 @@ client.once("clientReady", () => {
 		status: "online",
 		activities: [{ name: "$help for commands", type: 0 }]
 	});
+    // afk
+    doAfk(client);
+    
 	// logging
 	doLogging(client);
 

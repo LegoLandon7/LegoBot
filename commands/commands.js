@@ -5,6 +5,7 @@ import { addTrigger, removeTrigger, getTriggers } from "../triggers/functions/sa
 import { doLogging, purgeLog } from "../logging/logger.js";
 import { logMessage } from "../logging/functions/logging.js";
 import { zipGuildLogs } from "../logging/functions/log-files.js";
+import { goAfk, isAfk } from "../afk/afker.js";
 
 export const PREFIX = "$";
 const EMBED_COLOR = "#676767";
@@ -57,7 +58,8 @@ export function doCommands(client) {
                         { name: "prefix: ", value: PREFIX },
                         { name: "help [page]", value: "Shows this menu of commands" },
                         { name: "bot-info", value: "Shows info about the bot" },
-                        { name: "ping", value: "Gets the ping of the bot" }
+                        { name: "ping", value: "Gets the ping of the bot" },
+                        { name: "afk", value: "Go afk" }
                     )
                     .setFooter({ text: EMBED_DESC })
                     .setTimestamp();
@@ -178,6 +180,14 @@ export function doCommands(client) {
                         console.error(err);
                     }
                 });
+            }
+
+            //-----------------afk----------------
+            if (command === `${PREFIX}afk`) {
+                if (isAfk(msg.author)) return;
+                const reason = args.join(" ") || "No reason provided.";
+                goAfk(msg.author, reason);
+                return msg.reply(`💤 You are now marked as AFK: **${reason}**`);
             }
 
             //-----------------download-logs----------------
