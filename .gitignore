@@ -5,3 +5,4 @@ logging/welcome-channels.json
 triggers/triggers.json
 logging/purge-logs/
 logging/logs/
+afk/afk-users.json
