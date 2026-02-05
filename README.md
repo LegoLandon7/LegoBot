@@ -44,7 +44,7 @@ cd lego-bot
 
 ### 3. Create a .env file
 
-# Create a file named .env in the root directory with the following variables:
+# Create a file named .env in the root directory with the following variables
 
 ```env
 BOT_TOKEN=your_discord_bot_token_here
