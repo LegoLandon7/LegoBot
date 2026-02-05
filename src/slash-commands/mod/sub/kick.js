@@ -79,7 +79,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully kicked **${targetUser.tag}**`});
     } catch (error) {
         // unable to kick
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

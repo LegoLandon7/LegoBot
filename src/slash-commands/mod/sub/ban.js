@@ -81,7 +81,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully banned **${targetUser.tag}**`});
     } catch (error) {
         // unable to ban
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

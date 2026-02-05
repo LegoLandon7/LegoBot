@@ -28,7 +28,7 @@ async function execute(interaction) {
         await interaction.reply({content: "✅ Succesfully removed history."});
     } catch (error) {
         // error
-        console.error(error);
+        console.error(`[ERROR] [AI] ${error}`);
         throw error;
     }
 }

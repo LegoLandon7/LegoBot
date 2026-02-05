@@ -72,7 +72,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully unbanned **${targetUser.tag}**`});
     } catch (error) {
         // unable to unban
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

@@ -45,7 +45,7 @@ async function execute(interaction) {
         await interaction.editReply({content: response});
     } catch (error) {
         // no ai response
-        console.error(error);
+        console.error(`[ERROR] [AI] ${error}`);
         throw error;
     }
 

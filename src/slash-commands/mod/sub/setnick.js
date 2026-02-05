@@ -83,7 +83,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully changed the nickname of **${targetUser.tag}** to **${newNick ? newNick : targetUser.tag}**`});
     } catch (error) {
         // unable to change nickname
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

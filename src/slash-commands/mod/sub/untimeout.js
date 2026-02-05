@@ -80,7 +80,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully removed timeout from **${targetUser.tag}**`});
     } catch (error) {
         // unable to remove timeout
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

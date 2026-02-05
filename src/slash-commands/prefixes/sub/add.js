@@ -40,9 +40,9 @@ async function execute(interaction) {
     const prefixCount = result.total;
 
     if (prefixCount > MAX_PREFIX_AMOUNT) 
-        return interaction.editReply({ content: `❌ Max prefix amount of **${MAX_PREFIX_AMOUNT}**`});
+        return interaction.editReply({ content: `❌ Max prefix amount of **${MAX_PREFIX_AMOUNT}**. Try removing some prefixes.`});
     if (prefix.length > MAX_PREFIX_LENGTH)
-        return interaction.editReply({ content: `❌ Max prefix length of **${MAX_PREFIX_LENGTH}** characters`});
+        return interaction.editReply({ content: `❌ Max prefix length of **${MAX_PREFIX_LENGTH}** characters.`});
 
     try {
         // add prefix

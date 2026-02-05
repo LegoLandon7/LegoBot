@@ -118,7 +118,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully **${actionVerb}** role **${newRole.name}** ${newAction === 'add' ? 'to' : 'from'} **${targetUser.tag}**`});
     } catch (error) {
         // unable to change role
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }

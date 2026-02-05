@@ -94,7 +94,7 @@ async function execute(interaction) {
         return interaction.editReply({ content: `✅ Successfully timed out **${targetUser.tag}** for \`${time}\``});
     } catch (error) {
         // unable to timeout
-        console.error(error);
+        console.error(`[ERROR] [MODERATION] ${error}`);
         throw error;
     }
 }
