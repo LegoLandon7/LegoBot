@@ -1,0 +1,19 @@
+{
+  "name": "legobot",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "deploy": "node scripts/deploy-commands.js",
+    "dstart": "npm run deploy && npm run start",
+    "init-databases": "node scripts/init-databases.js",
+    "view-databaes": "node scripts/view-databases.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.2.3",
+    "groq-sdk": "^0.37.0"
+  }
+}
