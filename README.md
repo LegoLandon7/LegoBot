@@ -5,7 +5,7 @@
 **LegoBot** is a powerful Discord bot designed for server management and fun interactions. It is part of the **LlegoNetwork** project.  
 
 Join our **Discord server**: [https://discord.gg/ghHCxWxDMG](https://discord.gg/ghHCxWxDMG)  
-Official website: [https://llegonetwork.dev/projects/lego-bot](https://llegonetwork.dev/projects/LegoBot)  
+Official website: [https://llegonetwork.dev](https://llegonetwork.dev/projects/LegoBot)  
 
 ---
 
@@ -105,4 +105,4 @@ Make sure your bot has the necessary permissions in your Discord server to respo
 
 Join our [Discord server](https://discord.gg/ghHCxWxDMG) for support and updates.
 
-Check out our [website](https://llegonetwork.dev/projects/LegoBot) for more projects and guides
+Check out our [website](https://llegonetwork.dev) for more projects and guides
