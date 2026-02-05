@@ -5,13 +5,13 @@
 **LegoBot** is a powerful Discord bot designed for server management and fun interactions. It is part of the **LlegoNetwork** project.  
 
 Join our **Discord server**: [https://discord.gg/ghHCxWxDMG](https://discord.gg/ghHCxWxDMG)  
-Official website: [https://llegonetwork.dev/projects/lego-bot](https://llegonetwork.dev/projects/lego-bot)  
+Official website: [https://llegonetwork.dev/projects/lego-bot](https://llegonetwork.dev/projects/LegoBot)  
 
 ---
 
 ## Features
 
-- Fully functional Discord bot powered by **discord.js v14**
+- Fully functional Discord bot powered by **discord.js**
 - SQLite database support with **better-sqlite3**
 - GROQ SDK integration for database queries
 - Easy to deploy and run
@@ -105,4 +105,4 @@ Make sure your bot has the necessary permissions in your Discord server to respo
 
 Join our [Discord server](https://discord.gg/ghHCxWxDMG) for support and updates.
 
-Check out our [website](https://llegonetwork.dev/projects/lego-bot) for more projects and guides
+Check out our [website](https://llegonetwork.dev/projects/LegoBot) for more projects and guides
