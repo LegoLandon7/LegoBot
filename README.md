@@ -34,7 +34,7 @@ Before you start, make sure you have:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/llegonetwork/lego-bot.git
+git clone https://github.com/LegoLandon7/LegoBot.git
 cd lego-bot
 ```
 
