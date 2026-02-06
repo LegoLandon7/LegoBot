@@ -1,4 +1,4 @@
-// timeout.js -> Times out a user (slash)
+// timeout.js -> Times out a user 
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -54,15 +54,15 @@ async function execute(interaction) {
 
     // time validation
     if (!timeMs)
-        return interaction.editReply({ content: "⚠️ Time in the wrong format (5d, 6h, 4d8h)."});
+        return interaction.editReply({ content: "❌ Time in the wrong format (5d, 6h, 4d8h)."});
     if (timeMs > 1000 * 60 * 60 * 24 * 7 * 4)
-        return interaction.editReply({ content: "⚠️ Time can't be longer than 4 weeks (4w)"});
+        return interaction.editReply({ content: "❌ Time can't be longer than 4 weeks (4w)"});
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "⚠️ You need the `Moderate Members` permission."});
+        return interaction.editReply({ content: "❌ You need the `Moderate Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "⚠️ I don't have the `Moderate Members` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Moderate Members` permission."});
 
     // check if in guild
     if (!targetMember)

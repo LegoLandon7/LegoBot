@@ -1,4 +1,4 @@
-// setnick.js -> Changes nickname of user (slash)
+// setnick.js -> Changes nickname of user 
 // Landon Lego
 // Last updated 2/6/2026
 
@@ -52,9 +52,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ManageNicknames))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Nicknames` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Nicknames` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ManageNicknames))
-        return interaction.editReply({ content: "⚠️ I don't have the `Manage Nicknames` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Manage Nicknames` permission."});
 
     // check if in guild
     if (!targetMember)

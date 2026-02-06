@@ -12,13 +12,13 @@ async function execute(client, message, args) {
     
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return message.reply("⚠️ You need the `Ban Members` permission.");
+        return message.reply("❌ You need the `Ban Members` permission.");
     if (!botMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return message.reply("⚠️ I don't have the `Ban Members` permission.");
+        return message.reply("❌ I don't have the `Ban Members` permission.");
     
     // validate user argument
     if (!args[0])
-        return message.reply("⚠️ Please specify a user to ban.");
+        return message.reply("❌ Please specify a user to ban.");
     
     // parse user ID and reason
     const userId = args[0].replace(/[<@!>]/g, '');
@@ -38,21 +38,21 @@ async function execute(client, message, args) {
     
     // check if already banned
     if (await message.guild.bans.fetch(targetUser.id).catch(() => null))
-        return message.reply("⚠️ User is already banned.");
+        return message.reply("❌ User is already banned.");
     
     // role hierarchy check
     if (targetMember) {
         if (commandMember.roles.highest.position <= targetMember.roles.highest.position)
-            return message.reply("⚠️ User has higher or equal role than you.");
+            return message.reply("❌ User has higher or equal role than you.");
         if (botMember.roles.highest.position <= targetMember.roles.highest.position)
-            return message.reply("⚠️ I don't have a high enough role.");
+            return message.reply("❌ I don't have a high enough role.");
     }
     
     // self checks
     if (targetUser.id === client.user.id)
-        return message.reply("⚠️ Cannot ban myself.");
+        return message.reply("❌ Cannot ban myself.");
     if (targetUser.id === message.author.id)
-        return message.reply("⚠️ Cannot ban yourself.");
+        return message.reply("❌ Cannot ban yourself.");
     
     // ban the user
     try {

@@ -1,4 +1,4 @@
-// add.js -> Adds a prefix (slash)
+// add.js -> Adds a prefix 
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -24,7 +24,7 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const prefix = interaction.options.getString('prefix');
@@ -32,7 +32,7 @@ async function execute(interaction) {
 
     // permissions
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Guild` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Guild` permission."});
 
     // validation
     const countStmt = db.prepare('SELECT COUNT(*) AS total FROM prefixes WHERE guild_id = ?');
@@ -40,9 +40,9 @@ async function execute(interaction) {
     const prefixCount = result.total;
 
     if (prefixCount >= MAX_PREFIX_AMOUNT) 
-        return interaction.editReply({ content: `⚠️ Max prefix amount of **${MAX_PREFIX_AMOUNT}**. Try removing some prefixes.`});
+        return interaction.editReply({ content: `❌ Max prefix amount of **${MAX_PREFIX_AMOUNT}**. Try removing some prefixes.`});
     if (prefix.length > MAX_PREFIX_LENGTH)
-        return interaction.editReply({ content: `⚠️ Max prefix length of **${MAX_PREFIX_LENGTH}** characters.`});
+        return interaction.editReply({ content: `❌ Max prefix length of **${MAX_PREFIX_LENGTH}** characters.`});
 
     try {
         // add prefix to database

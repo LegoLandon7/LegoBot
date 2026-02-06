@@ -1,4 +1,4 @@
-// toggle.js -> Toggles a prefix (slash)
+// toggle.js -> Toggles a prefix 
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -33,7 +33,7 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const prefix = interaction.options.getString('prefix');
@@ -42,7 +42,7 @@ async function execute(interaction) {
 
     // permissions
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Guild` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Guild` permission."});
 
     // get the prefix state
     const enStmt = db.prepare('SELECT enabled FROM prefixes WHERE guild_id = ? AND prefix = ?');
@@ -55,9 +55,9 @@ async function execute(interaction) {
     let newAction = result.enabled;
 
     if (result.enabled === 1 && action === 'enable') 
-        return interaction.editReply({ content: "⚠️ This prefix is already enabled" });
+        return interaction.editReply({ content: "❌ This prefix is already enabled" });
     else if (result.enabled === 0 && action === 'disable')
-        return interaction.editReply({ content: "⚠️ This prefix is already disabled" });
+        return interaction.editReply({ content: "❌ This prefix is already disabled" });
 
     if (action === 'toggle') {
         if (result.enabled === 1) newAction = 0;

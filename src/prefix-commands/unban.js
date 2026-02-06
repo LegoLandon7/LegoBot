@@ -11,13 +11,13 @@ async function execute(client, message, args) {
     
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return message.reply("⚠️ You need the `Ban Members` permission.");
+        return message.reply("❌ You need the `Ban Members` permission.");
     if (!botMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return message.reply("⚠️ I don't have the `Ban Members` permission.");
+        return message.reply("❌ I don't have the `Ban Members` permission.");
     
     // validate user argument
     if (!args[0])
-        return message.reply("⚠️ Please specify a user to unban.");
+        return message.reply("❌ Please specify a user to unban.");
     
     // parse user ID and reason
     const userId = args[0].replace(/[<@!>]/g, '');
@@ -35,13 +35,13 @@ async function execute(client, message, args) {
     
     // check if user is banned
     if (!await message.guild.bans.fetch(targetUser.id).catch(() => null))
-        return message.reply("⚠️ User is not banned.");
+        return message.reply("❌ User is not banned.");
     
     // self checks
     if (targetUser.id === client.user.id)
-        return message.reply("⚠️ Cannot unban myself.");
+        return message.reply("❌ Cannot unban myself.");
     if (targetUser.id === message.author.id)
-        return message.reply("⚠️ Cannot unban yourself.");
+        return message.reply("❌ Cannot unban yourself.");
     
     // unban the user
     try {

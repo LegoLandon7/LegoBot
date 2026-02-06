@@ -12,13 +12,13 @@ async function execute(client, message, args) {
     
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return message.reply("⚠️ You need the `Kick Members` permission.");
+        return message.reply("❌ You need the `Kick Members` permission.");
     if (!botMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return message.reply("⚠️ I don't have the `Kick Members` permission.");
+        return message.reply("❌ I don't have the `Kick Members` permission.");
     
     // validate user argument
     if (!args[0])
-        return message.reply("⚠️ Please specify a user to kick.");
+        return message.reply("❌ Please specify a user to kick.");
     
     // parse user ID and reason
     const userId = args[0].replace(/[<@!>]/g, '');
@@ -39,16 +39,16 @@ async function execute(client, message, args) {
     // role hierarchy check
     if (targetMember) {
         if (commandMember.roles.highest.position <= targetMember.roles.highest.position)
-            return message.reply("⚠️ User has higher or equal role than you.");
+            return message.reply("❌ User has higher or equal role than you.");
         if (botMember.roles.highest.position <= targetMember.roles.highest.position)
-            return message.reply("⚠️ I don't have a high enough role.");
+            return message.reply("❌ I don't have a high enough role.");
     }
     
     // self checks
     if (targetUser.id === client.user.id)
-        return message.reply("⚠️ Cannot kick myself.");
+        return message.reply("❌ Cannot kick myself.");
     if (targetUser.id === message.author.id)
-        return message.reply("⚠️ Cannot kick yourself.");
+        return message.reply("❌ Cannot kick yourself.");
     
     // kick the user
     try {

@@ -1,4 +1,4 @@
-// reset-history.js -> Resets AI history (slash)
+// reset-history.js -> Resets AI history 
 // Landon Lego
 // Last updated 1/31/2026
 

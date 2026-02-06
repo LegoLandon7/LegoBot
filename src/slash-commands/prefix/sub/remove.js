@@ -1,4 +1,4 @@
-// remove.js -> Removes a prefix (slash)
+// remove.js -> Removes a prefix 
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -23,7 +23,7 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const prefix = interaction.options.getString('prefix');
@@ -31,7 +31,7 @@ async function execute(interaction) {
 
     // permissions
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Guild` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Guild` permission."});
 
     try {
         // remove prefix from database

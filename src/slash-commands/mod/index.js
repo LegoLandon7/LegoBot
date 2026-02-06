@@ -1,4 +1,4 @@
-// mod.js -> Moderation command (slash)
+// mod.js -> Moderation command 
 // Landon Lego
 // Last updated 2/6/2026
 

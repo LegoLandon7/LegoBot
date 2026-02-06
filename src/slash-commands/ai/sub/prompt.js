@@ -1,4 +1,4 @@
-// prompt.js -> AI chat prompt (slash)
+// prompt.js -> AI chat prompt 
 // Landon Lego
 // Last updated 1/31/2026
 

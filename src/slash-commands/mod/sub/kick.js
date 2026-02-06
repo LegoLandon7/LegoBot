@@ -1,4 +1,4 @@
-// kick.js -> Kicks a user (slash)
+// kick.js -> Kicks a user 
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -30,7 +30,7 @@ async function execute(interaction) {
     await interaction.deferReply(ephemeral ? {flags: 64} : {});
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const targetUser = interaction.options.getUser('target_user');
@@ -46,9 +46,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return interaction.editReply({ content: "⚠️ You need the `Kick Members` permission."});
+        return interaction.editReply({ content: "❌ You need the `Kick Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return interaction.editReply({ content: "⚠️ I don't have the `Kick Members` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Kick Members` permission."});
 
     // check if in guild
     if (!targetMember)

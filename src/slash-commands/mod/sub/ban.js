@@ -1,4 +1,4 @@
-// ban.js -> Bans a user (slash)
+// ban.js -> Bans a user 
 // Landon Lego
 // Last updated 2/6/2026
 

@@ -11,13 +11,13 @@ async function execute(client, message, args) {
     
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return message.reply("⚠️ You need the `Moderate Members` permission.");
+        return message.reply("❌ You need the `Moderate Members` permission.");
     if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return message.reply("⚠️ I don't have the `Moderate Members` permission.");
+        return message.reply("❌ I don't have the `Moderate Members` permission.");
     
     // validate user argument
     if (!args[0])
-        return message.reply("⚠️ Please specify a user to remove timeout from.");
+        return message.reply("❌ Please specify a user to remove timeout from.");
     
     // parse user ID and reason
     const userId = args[0].replace(/[<@!>]/g, '');
@@ -37,19 +37,19 @@ async function execute(client, message, args) {
     
     // check if in guild
     if (!targetMember)
-        return message.reply("⚠️ User is not in this guild.");
+        return message.reply("❌ User is not in this guild.");
     
     // role hierarchy check
     if (commandMember.roles.highest.position <= targetMember.roles.highest.position)
-        return message.reply("⚠️ User has higher or equal role than you.");
+        return message.reply("❌ User has higher or equal role than you.");
     if (botMember.roles.highest.position <= targetMember.roles.highest.position)
-        return message.reply("⚠️ I don't have a high enough role.");
+        return message.reply("❌ I don't have a high enough role.");
     
     // self checks
     if (targetUser.id === client.user.id)
-        return message.reply("⚠️ Cannot remove timeout from myself.");
+        return message.reply("❌ Cannot remove timeout from myself.");
     if (targetUser.id === message.author.id)
-        return message.reply("⚠️ Cannot remove timeout from yourself.");
+        return message.reply("❌ Cannot remove timeout from yourself.");
     
     // remove timeout from the user
     try {

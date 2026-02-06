@@ -57,17 +57,17 @@ async function execute(client, message, args) {
     
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return message.reply("⚠️ You need the `Manage Roles` permission.");
+        return message.reply("❌ You need the `Manage Roles` permission.");
     if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return message.reply("⚠️ I don't have the `Manage Roles` permission.");
+        return message.reply("❌ I don't have the `Manage Roles` permission.");
     
     // validate user argument
     if (!args[0])
-        return message.reply("⚠️ Please specify a user.");
+        return message.reply("❌ Please specify a user.");
     
     // validate role argument
     if (!args[1])
-        return message.reply("⚠️ Please specify a role.");
+        return message.reply("❌ Please specify a role.");
     
     // parse user ID, role, action, and reason
     const userId = args[0].replace(/[<@!>]/g, '');
@@ -108,19 +108,19 @@ async function execute(client, message, args) {
     
     // check if in guild
     if (!targetMember)
-        return message.reply("⚠️ User is not in this guild.");
+        return message.reply("❌ User is not in this guild.");
     
     // role hierarchy check
     if (commandMember.roles.highest.position <= targetMember.roles.highest.position && message.author.id !== targetUser.id)
-        return message.reply("⚠️ User has higher or equal role than you.");
+        return message.reply("❌ User has higher or equal role than you.");
     if (botMember.roles.highest.position <= targetMember.roles.highest.position)
-        return message.reply("⚠️ I don't have a high enough role.");
+        return message.reply("❌ I don't have a high enough role.");
     if (botMember.roles.highest.position <= newRole.position)
-        return message.reply("⚠️ I cannot manage that role.");
+        return message.reply("❌ I cannot manage that role.");
     
     // self checks
     if (targetUser.id === client.user.id)
-        return message.reply("⚠️ Cannot change my own roles.");
+        return message.reply("❌ Cannot change my own roles.");
     
     // change the role of the user
     try {
@@ -139,14 +139,14 @@ async function execute(client, message, args) {
         
         if (action === 'add') {
             if (targetMember.roles.cache.has(newRole.id))
-                return message.reply("⚠️ User already has this role.");
+                return message.reply("❌ User already has this role.");
             await targetMember.roles.add(newRole, reason);
             newAction = 'add';
         }
         
         if (action === 'remove') {
             if (!targetMember.roles.cache.has(newRole.id))
-                return message.reply("⚠️ User does not have this role.");
+                return message.reply("❌ User does not have this role.");
             await targetMember.roles.remove(newRole, reason);
             newAction = 'remove';
         }

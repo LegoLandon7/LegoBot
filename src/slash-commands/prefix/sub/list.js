@@ -1,4 +1,4 @@
-// list.js -> Lists all prefixes (slash)
+// list.js -> Lists all prefixes 
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -20,7 +20,7 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const guildId = interaction.guild.id;

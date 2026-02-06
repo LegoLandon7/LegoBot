@@ -1,4 +1,4 @@
-// unban.js -> Unbans a user (slash)
+// unban.js -> Unbans a user 
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -45,9 +45,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return interaction.editReply({ content: "⚠️ You need the `Ban Members` permission."});
+        return interaction.editReply({ content: "❌ You need the `Ban Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return interaction.editReply({ content: "⚠️ I don't have the `Ban Members` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Ban Members` permission."});
 
     // already banned
     if (!await interaction.guild.bans.fetch(targetUser.id).catch(() => null))

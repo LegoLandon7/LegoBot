@@ -1,4 +1,4 @@
-// view-history.js -> Views AI history (slash)
+// view-history.js -> Views AI history 
 // Landon Lego
 // Last updated 1/31/2026
 

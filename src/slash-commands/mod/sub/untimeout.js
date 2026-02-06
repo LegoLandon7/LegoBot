@@ -1,4 +1,4 @@
-// untimeout.js -> Removes timeout from user (slash)
+// untimeout.js -> Removes timeout from user 
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -47,9 +47,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "⚠️ You need the `Moderate Members` permission."});
+        return interaction.editReply({ content: "❌ You need the `Moderate Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "⚠️ I don't have the `Moderate Members` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Moderate Members` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -63,9 +63,9 @@ async function execute(interaction) {
 
     // self checks
     if (targetUser.id === botUser.id)
-        return interaction.editReply({ content: "⚠️ Cannot remove timeout from myself."});
+        return interaction.editReply({ content: "❌ Cannot remove timeout from myself."});
     if (commandUser.id === targetUser.id)
-        return interaction.editReply({ content: "⚠️ Cannot remove timeout from yourself."});
+        return interaction.editReply({ content: "❌ Cannot remove timeout from yourself."});
     
     // removes timeout from the user
     try {

@@ -1,4 +1,4 @@
-// ai.js -> AI command (slash)
+// ai.js -> AI command 
 // Landon Lego
 // Last updated 2/6/2026
 

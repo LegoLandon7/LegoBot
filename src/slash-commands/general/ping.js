@@ -1,4 +1,4 @@
-// ping.js -> Gets latency (slash)
+// ping.js -> Gets latency 
 // Landon Lego
 // Last updated 2/6/2026
 

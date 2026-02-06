@@ -1,4 +1,4 @@
-// setrole.js -> Changes role of user (slash)
+// setrole.js -> Changes role of user 
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -61,9 +61,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Roles` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Roles` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return interaction.editReply({ content: "⚠️ I don't have the `Manage Roles` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Manage Roles` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -96,14 +96,14 @@ async function execute(interaction) {
 
         if (action === 'add') {
             if (targetMember.roles.cache.has(newRole.id))
-                return interaction.editReply({ content: "⚠️ User already has this role."});
+                return interaction.editReply({ content: "❌ User already has this role."});
             await targetMember.roles.add(newRole, reason);
             newAction = 'add';
         }
 
         if (action === 'remove') {
             if (!targetMember.roles.cache.has(newRole.id))
-                return interaction.editReply({ content: "⚠️ User does not have this role."});
+                return interaction.editReply({ content: "❌ User does not have this role."});
             await targetMember.roles.remove(newRole, reason);
             newAction = 'remove';
         }

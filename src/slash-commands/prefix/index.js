@@ -1,4 +1,4 @@
-// prefix.js -> Prefix command (slash)
+// prefix.js -> Prefix command 
 // Landon Lego
 // Last updated 2/6/2026
 

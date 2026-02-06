@@ -31,7 +31,7 @@ function loadCommands(dir) {
 
             // invalid file
             if (!command.data || !command.execute) {
-                console.warn(`⚠️ The command at ${fullPath} is missing a required "data" or "execute" property.`);
+                console.warn(`❌ The command at ${fullPath} is missing a required "data" or "execute" property.`);
                 continue;
             }
 

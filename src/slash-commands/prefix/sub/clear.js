@@ -1,4 +1,4 @@
-// clear.js -> Removes all prefixes (slash)
+// clear.js -> Removes all prefixes 
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -19,14 +19,14 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
+        return interaction.editReply({ content: "❌ This command can only be used in servers." });
 
     // data
     const guildId = interaction.guild.id;
 
     // permissions
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return interaction.editReply({ content: "⚠️ You need the `Manage Guild` permission."});
+        return interaction.editReply({ content: "❌ You need the `Manage Guild` permission."});
 
     try {
         // remove all prefixes from database
