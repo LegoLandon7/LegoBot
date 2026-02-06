@@ -1,6 +1,6 @@
-// ban.js ->  Bans a user
+// ban.js -> Bans a user (slash)
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // imports
 const { PermissionFlagsBits } = require('discord.js');
@@ -19,15 +19,15 @@ function data(subcommand) {
                 .setDescription('The reason the user is banned')
                 .setRequired(false))
         .addBooleanOption(o =>
-            o.setName('ephermeral')
-                .setDescription('hide the confirmation message')
+            o.setName('ephemeral')
+                .setDescription('Hide the confirmation message')
                 .setRequired(false));
 }
 
 // execute data
 async function execute(interaction) {
-    const ephermeral = interaction.options.getBoolean('ephermeral') ?? false;
-    await interaction.deferReply(ephermeral ? {flags: 64} : {}); // ephermeral
+    const ephemeral = interaction.options.getBoolean('ephemeral') ?? false;
+    await interaction.deferReply(ephemeral ? { flags: 64 } : {});
 
     if (!interaction.inGuild())
         return interaction.editReply({ content: "❌ This command can only be used in servers." });
@@ -48,7 +48,7 @@ async function execute(interaction) {
     if (!commandMember.permissions.has(PermissionFlagsBits.BanMembers))
         return interaction.editReply({ content: "❌ You need the `Ban Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return interaction.editReply({ content: "❌ I don’t have the `Ban Members` permission."});
+        return interaction.editReply({ content: "❌ I don't have the `Ban Members` permission."});
 
     // already banned
     if (await interaction.guild.bans.fetch(targetUser.id).catch(() => null))
@@ -70,19 +70,18 @@ async function execute(interaction) {
     
     // ban the user
     try {
-        // dm
-        await targetUser.send(`🔨 You have been banned from **${interaction.guild.name}**\nreason: ${reason}`)
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send(`📨 You have been banned from **${interaction.guild.name}**\nReason: ${reason}`)
+            .catch(() => console.log(`[ERROR] [BAN] Could not DM ${targetUser.tag}`));
 
-        // ban
+        // execute ban
         await interaction.guild.members.ban(targetUser.id, { reason });
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully banned **${targetUser.tag}**`});
     } catch (error) {
-        // unable to ban
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [BAN] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to ban user."});
     }
 }
 

@@ -1,8 +1,8 @@
-// ai-model-handler.js -> handles AI commands
+// ai-model-handler.js -> Handles AI model interactions
 // Landon Lego
 // Last updated 1/31/2026
 
-// intialize
+// initialize
 let userHistory = {};
 
 const MAX_LENGTH = 250;

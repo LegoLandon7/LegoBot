@@ -1,30 +1,24 @@
-// embeds.js -> makes embeds easier
+// embeds.js -> Embed builder utility
 // Landon Lego
-// Last updated 2/5/2026
+// Last updated 2/6/2026
 
 // imports
 const { EmbedBuilder } = require('discord.js');
 
 // data
 const COLORS = {
-    GOOD: "#43b581",
-    BAD: "#f04747",
-    NORMAL: "#ffdd00",
-    NEUTRAL: "#747f8d",
-    INFO: "#616df0",
+    SUCCESS: '#43b581',
+    ERROR: '#f04747',
+    WARNING: '#ffdd00',
+    INFO: '#616df0'
 };
 
 // main embed builder
-function buildEmbed(title, description, color = COLORS.NEUTRAL, user = null) {
-    // embed
-    const embed = new EmbedBuilder()
-        .setTitle(title)
-        .setDescription(description)
-        .setColor(color)
-        .setTimestamp()
-
-        if (user) embed.setFooter({text: user.username, iconURL: user.displayAvatarURL()})
-
+function buildEmbed(title = null, description = null, color = COLORS.INFO, user = null) {
+    const embed = new EmbedBuilder().setColor(color).setTimestamp();
+    if (title) embed.setTitle(title);
+    if (description) embed.setDescription(description);
+    if (user) embed.setFooter({ text: user.username, iconURL: user.displayAvatarURL() });
     return embed;
 }
 

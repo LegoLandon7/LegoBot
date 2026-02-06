@@ -1,8 +1,6 @@
-// index.js -> entry point for the bot
+// index.js -> Main entry point
 // Landon Lego
-// Last updated 1/31/2026
-
-// flags: 64 -> ephemeral
+// Last updated 2/6/2026
 
 // imports
 require('dotenv').config();
@@ -40,16 +38,14 @@ client.once('clientReady', () => {
     });
     console.log('✅ Presence set');
 
-    // execute commands
+    // register and execute commands
     registerSlashCommands(client);
     executeSlashCommands(client);
-
     registerPrefixCommands(client);
     executePrefixCommands(client);
 
-    // log
-    console.log(`✅ Logged in as ${client.user.tag}`);
+    console.log(`✅ Bot logged in as ${client.user.tag}`);
 });
 
-// login
+// login to Discord
 client.login(process.env.BOT_TOKEN);

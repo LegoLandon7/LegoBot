@@ -1,9 +1,10 @@
-// prefix-command-handler.js -> handle commands for the bot
+// prefix-command-handler.js -> Handles prefix commands
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // imports
 const { msToDuration } = require('../utils/time.js');
+const db = require('../../scripts/init-databases.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -66,9 +67,9 @@ function registerPrefixCommands(client) {
             } else if (file.name.endsWith('.js')) {
                 const command = require(fullPath);
                 
-                // invalid file
+                // validate command
                 if (!command.structure || !command.execute || !command.name) {
-                    console.warn(`⚠️ The command at ${fullPath} is missing a required "structure", "execute", or "name" property.`);
+                    console.warn(`[WARNING] Command at ${fullPath} missing 'structure', 'execute', or 'name'`);
                     continue;
                 }
                 commands.set(command.name.toLowerCase(), command);
@@ -76,29 +77,47 @@ function registerPrefixCommands(client) {
         }
     }
     
-    // load
+    // load all commands
     loadCommands(commandsPath);
-    console.log(`✅ Successfully loaded ${commands.size} application (prefix) commands.`);
+    console.log(`✅ Loaded ${commands.size} prefix commands`);
 }
 
 // execute commands
 function executePrefixCommands(client) {
     client.on('messageCreate', async (message) => {
         if (message.author.bot) return;
+        if (!message.guild) return;
         
         // command content
-        const content = message.content;
-        const prefix = content[0];
+        const content = message.content.toLowerCase();
+
+        // load guild specific prefixes from database
+        let allPrefixes = [...DEFAULT_PREFIXES];
         
-        // valid prefix
-        if (!DEFAULT_PREFIXES.includes(prefix)) return;
+        if (message.guild) {
+            const stmt = db.prepare('SELECT prefix FROM prefixes WHERE guild_id = ? AND enabled = 1');
+            const guildPrefixes = stmt.all(message.guild.id).map(p => p.prefix);
+            allPrefixes = [...DEFAULT_PREFIXES, ...guildPrefixes];
+        }
+
+        // find used prefix
+        let usedPrefix = null;
+        for (const prefix of allPrefixes) {
+            if (content.startsWith(prefix)) {
+                usedPrefix = prefix;
+                break;
+            }
+        }
+
+        // No valid prefix found
+        if (!usedPrefix) return;
         
         // command arguments
-        const args = content.slice(1).trim().split(/\s+/);
+        const args = content.slice(usedPrefix.length).trim().split(/\s+/);
         const commandName = args.shift().toLowerCase();
         const command = commands.get(commandName);
         
-        // command doesn't exist
+        // skip if command not found
         if (!command) return;
         
         // execute
@@ -107,26 +126,15 @@ function executePrefixCommands(client) {
                 // execute command
                 await command.execute(client, message, args);
             } else {
-                // tell user the cooldown
+                // cooldown active
                 const entry = cooldowns[message.author.id][commandName];
                 const remaining = entry.time - (Date.now() - entry.date);
-                const reply = await message.reply({ content: `⚠️ Try this command again in \`${msToDuration(remaining)}\`` });
-                
-                // delete after 5 seconds
-                setTimeout(() => {
-                    reply.delete().catch(err => console.error('⚠️ Failed to delete cooldown message:', err));
-                }, timeout * 1000);
+                const reply = await message.reply({ content: `⏳ Try again in \`${msToDuration(remaining)}\`` });
+                setTimeout(() => reply.delete().catch(err => console.error('[WARNING] Failed to delete message:', err)), timeout * 1000);
             }
         } catch (error) {
-            console.error(error);
-            
-            // error - show structure
-            const errorMsg = await message.reply({ content: `❌ Error executing command.\n**Usage:** \`${prefix}${command.structure}\`` });
-            
-            // delete after 5 seconds
-            setTimeout(() => {
-                errorMsg.delete().catch(err => console.error('Failed to delete error message:', err));
-            }, 5000);
+            console.error('[ERROR]', error);
+            await message.reply({ content: `✗ Error executing command.\n**Usage:** \`${command.structure}\`` });
         }
     });
 }

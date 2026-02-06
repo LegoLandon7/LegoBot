@@ -1,6 +1,6 @@
-// slash-command-handler.js -> handle commands for the bot
+// slash-command-handler.js -> Handles slash commands
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // imports
 const { Collection } = require('discord.js');
@@ -64,9 +64,9 @@ function registerSlashCommands(client) {
             } else if (file.name.endsWith('.js')) {
                 const command = require(fullPath);
 
-                // invalid file
+                // validate command
                 if (!command.data || !command.execute) {
-                    console.warn(`⚠️ The command at ${fullPath} is missing a required "data" or "execute" property.`);
+                    console.warn(`[WARNING] Command at ${fullPath} missing 'data' or 'execute' property`);
                     continue;
                 }
 
@@ -78,7 +78,7 @@ function registerSlashCommands(client) {
     // load
     loadCommands(commandsPath);
 
-    console.log(`✅ Successfully loaded ${client.commands.size} application (/) commands.`);
+    console.log(`✅ Loaded ${client.commands.size} slash commands`);
 }
 
 // execute comnmands
@@ -89,9 +89,9 @@ function executeSlashCommands(client) {
         // get command
         const command = client.commands.get(interaction.commandName);
 
-        // invalid command
+        // validate command exists
         if (!command) {
-            console.warn(`⚠️ Unknown command: ${interaction.commandName}`);
+            console.warn(`[WARNING] Unknown command: ${interaction.commandName}`);
             return;
         }
 
@@ -101,19 +101,20 @@ function executeSlashCommands(client) {
                 // execute command
                 await command.execute(interaction, client);
             } else {
-                // tell user the cooldown
+                // cooldown active
                 const entry = cooldowns[interaction.user.id][interaction.commandName];
                 const remaining = entry.time - (Date.now() - entry.date);
-                await interaction.reply({ content: `⚠️ Try this command again in \`${msToDuration(remaining)}\``, flags: 64 }); // ephermeral
+                await interaction.reply({ content: `⏳ Try again in \`${msToDuration(remaining)}\``, flags: 64 });
             }
         } catch (error) {
-            console.error(error);
+            console.error('[ERROR]', error);
 
-            // error
+            // send error message
+            const errorContent = { content: '✗ An error occurred executing this command', flags: 64 };
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: '❌ Error executing command.', flags: 64 }); // ephermeral
+                await interaction.followUp(errorContent);
             } else {
-                await interaction.reply({ content: '❌ Error executing command.', flags: 64 }); // ephermeral
+                await interaction.reply(errorContent);
             }
         }
     });

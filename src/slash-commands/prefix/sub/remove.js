@@ -1,4 +1,4 @@
-// remove.js -> remove a prefix
+// remove.js -> Removes a prefix (slash)
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -11,7 +11,7 @@ const db = require('../../../../scripts/init-databases.js');
 function data(subcommand) {
     subcommand
         .setName('remove')
-        .setDescription('Removes a prefix from the guild')
+        .setDescription('Removes a custom prefix from the guild')
         .addStringOption(o =>
             o.setName('prefix')
                 .setDescription('The prefix to remove')
@@ -23,33 +23,31 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "❌ This command can only be used in servers." });
+        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
 
     // data
     const prefix = interaction.options.getString('prefix');
     const guildId = interaction.guild.id;
 
-
     // permissions
     if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild))
-        return interaction.editReply({ content: "❌ You need the `Manage Guild` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Manage Guild` permission."});
 
     try {
-        // add prefix
+        // remove prefix from database
         const stmt = db.prepare('DELETE FROM prefixes WHERE guild_id = ? AND prefix = ?');
         const result = stmt.run(guildId, prefix);
 
-        // reply
+        // success reply
         if (result.changes > 0) {
-            const embed = buildEmbed('❌ Removed prefix', `**Prefix:** \`${prefix}\``, 
-                COLORS.BAD, interaction.user);
+            const embed = buildEmbed(`✅ Removed prefix: \`${prefix}\``, null,
+                COLORS.GOOD, interaction.user);
 
             await interaction.editReply({ embeds: [embed]}); 
         } else
-            await interaction.editReply({content: `❌ couldn't find the prefix \`${prefix}\``}); 
+            await interaction.editReply({content: `❌ Couldn't find the prefix \`${prefix}\``}); 
     } catch(error) {
-        // error
-        console.error(`[ERROR] [DATABASE] - ${error}`);
+        console.error(`[ERROR] [PREFIX] - ${error}`);
         await interaction.editReply({content: `❌ Error removing prefix`}); 
     }
 }

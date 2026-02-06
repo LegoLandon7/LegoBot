@@ -1,4 +1,4 @@
-// list.js ->  Lists all prefixes
+// list.js -> Lists all prefixes (slash)
 // Landon Lego
 // Last updated 2/5/2026
 
@@ -20,13 +20,13 @@ async function execute(interaction) {
     await interaction.deferReply();
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "❌ This command can only be used in servers." });
+        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
 
     // data
     const guildId = interaction.guild.id;
 
     try {
-        // list prefixes
+        // list prefixes from database
         const stmt = db.prepare('SELECT id, prefix, enabled FROM prefixes WHERE guild_id = ? ORDER BY created_at');
         const prefixes = stmt.all(guildId) || [];
 
@@ -45,15 +45,15 @@ async function execute(interaction) {
         const description = [
             `🌐 **Default:** ${defaultPrefixList}`,
             `✅ **Enabled:** ${enabledList}`,
-            `❌**Disabled:** ${disabledList}`
+            `❌ **Disabled:** ${disabledList}`
         ].join('\n\n');
 
-        const embed = buildEmbed(`📄**${interaction.guild.name}**'s prefixes`,
-            description, COLORS.GOOD, interaction.user);
+        const embed = buildEmbed(`📄 **${interaction.guild.name}**'s prefixes`,
+            description, COLORS.INFO, interaction.user);
 
         await interaction.editReply({ embeds: [embed]});
     } catch(error) {
-        console.error(`[ERROR] [DATABASE] - ${error}`);
+        console.error(`[ERROR] [PREFIX] - ${error}`);
         await interaction.editReply({content: `❌ Error listing prefixes`});
     }
 

@@ -1,4 +1,4 @@
-// ban.js ->  Bans a user
+// unban.js -> Unbans a user (slash)
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -45,9 +45,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return interaction.editReply({ content: "❌ You need the `Ban Members` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Ban Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.BanMembers))
-        return interaction.editReply({ content: "❌ I don’t have the `Ban Members` permission."});
+        return interaction.editReply({ content: "⚠️ I don't have the `Ban Members` permission."});
 
     // already banned
     if (!await interaction.guild.bans.fetch(targetUser.id).catch(() => null))
@@ -61,19 +61,18 @@ async function execute(interaction) {
     
     // unban the user
     try {
-        // dm
-        await targetUser.send(`🔨 You have been unbanned from **${interaction.guild.name}**\nreason: ${reason}`)
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send(`📨 You have been unbanned from **${interaction.guild.name}**\nReason: ${reason}`)
+            .catch(() => console.log(`[ERROR] [UNBAN] Could not DM ${targetUser.tag}`));
 
-        // unban
+        // execute unban
         await interaction.guild.members.unban(targetUser.id, { reason });
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully unbanned **${targetUser.tag}**`});
     } catch (error) {
-        // unable to unban
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [UNBAN] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to unban user."});
     }
 }
 

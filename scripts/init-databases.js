@@ -1,4 +1,4 @@
-// init-database.js -> create all databases if not made
+// init-databases.js -> Initialize all databases
 // Landon Lego
 // Last updated 2/5/2026
 

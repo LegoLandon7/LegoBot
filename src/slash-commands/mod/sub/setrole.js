@@ -1,4 +1,4 @@
-// setrole.js ->  Changes the role of a user
+// setrole.js -> Changes role of user (slash)
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -61,9 +61,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return interaction.editReply({ content: "❌ You need the `Manage Roles` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Manage Roles` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ManageRoles))
-        return interaction.editReply({ content: "❌ I don’t have the `Manage Roles` permission."});
+        return interaction.editReply({ content: "⚠️ I don't have the `Manage Roles` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -79,29 +79,29 @@ async function execute(interaction) {
     if (targetUser.id === botUser.id)
         return interaction.editReply({ content: "❌ Cannot change the role of myself."});
     
-    // change the role of the user
+    // manage role
     try {
-        // change role
+        // manage role
         let newAction = '';
 
-        if (action == 'toggle') {
+        if (action === 'toggle') {
             if (targetMember.roles.cache.has(newRole.id)) {
                 await targetMember.roles.remove(newRole, reason);
-                newAction = 'remove'
+                newAction = 'remove';
             } else {
                 await targetMember.roles.add(newRole, reason);
                 newAction = 'add';
             }
         }
 
-        if (action == 'add') {
+        if (action === 'add') {
             if (targetMember.roles.cache.has(newRole.id))
                 return interaction.editReply({ content: "⚠️ User already has this role."});
             await targetMember.roles.add(newRole, reason);
             newAction = 'add';
         }
 
-        if (action == 'remove') {
+        if (action === 'remove') {
             if (!targetMember.roles.cache.has(newRole.id))
                 return interaction.editReply({ content: "⚠️ User does not have this role."});
             await targetMember.roles.remove(newRole, reason);
@@ -110,16 +110,15 @@ async function execute(interaction) {
 
         const actionVerb = newAction === 'add' ? 'added' : 'removed';
 
-        // dm
-        await targetUser.send({content: `🎭 Your role **${newRole.name}** has been **${actionVerb}** in **${interaction.guild.name}**\nreason: ${reason}`})
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send({content: `🎭 Your role **${newRole.name}** has been **${actionVerb}** in **${interaction.guild.name}**\nReason: ${reason}`})
+            .catch(() => console.log(`[ERROR] [SETROLE] Could not DM ${targetUser.tag}`));
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully **${actionVerb}** role **${newRole.name}** ${newAction === 'add' ? 'to' : 'from'} **${targetUser.tag}**`});
     } catch (error) {
-        // unable to change role
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [SETROLE] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to change role."});
     }
 }
 

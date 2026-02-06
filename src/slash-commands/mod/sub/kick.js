@@ -1,4 +1,4 @@
-// kick.js ->  Kicks a user
+// kick.js -> Kicks a user (slash)
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -26,11 +26,11 @@ function data(subcommand) {
 
 // execute data
 async function execute(interaction) {
-    const ephermeral = interaction.options.getBoolean('ephermeral') ?? false;
-    await interaction.deferReply(ephermeral ? {flags: 64} : {}); // ephermeral
+    const ephemeral = interaction.options.getBoolean('ephemeral') ?? false;
+    await interaction.deferReply(ephemeral ? {flags: 64} : {});
 
     if (!interaction.inGuild())
-        return interaction.editReply({ content: "❌ This command can only be used in servers." });
+        return interaction.editReply({ content: "⚠️ This command can only be used in servers." });
 
     // data
     const targetUser = interaction.options.getUser('target_user');
@@ -46,9 +46,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return interaction.editReply({ content: "❌ You need the `Kick Members` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Kick Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.KickMembers))
-        return interaction.editReply({ content: "❌ I don’t have the `Kick Members` permission."});
+        return interaction.editReply({ content: "⚠️ I don't have the `Kick Members` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -68,19 +68,18 @@ async function execute(interaction) {
     
     // kick the user
     try {
-        // dm
-        await targetUser.send(`💥 You have been kicked from **${interaction.guild.name}**\nreason: ${reason}`)
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send(`👢 You have been kicked from **${interaction.guild.name}**\nReason: ${reason}`)
+            .catch(() => console.log(`[ERROR] [KICK] Could not DM ${targetUser.tag}`));
 
-        // kick
+        // execute kick
         await targetMember.kick(reason);
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully kicked **${targetUser.tag}**`});
     } catch (error) {
-        // unable to kick
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [KICK] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to kick user."});
     }
 }
 

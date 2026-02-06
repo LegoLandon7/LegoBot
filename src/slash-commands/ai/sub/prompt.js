@@ -1,4 +1,4 @@
-// prompt.js -> AI chat subcommand
+// prompt.js -> AI chat prompt (slash)
 // Landon Lego
 // Last updated 1/31/2026
 
@@ -39,14 +39,13 @@ async function execute(interaction) {
         : "none";
 
     try {
-        // get ai response
+        // get AI response
         response = await getAIResponse(prompt, context);
         if (showPrompt) response = `**Prompt:** ${prompt}\n\n**Response:** ${response}`;
         await interaction.editReply({content: response});
     } catch (error) {
-        // no ai response
-        console.error(`[ERROR] [AI] ${error}`);
-        throw error;
+        console.error(`[ERROR] [AI] - ${error}`);
+        return interaction.editReply({content: "❌ Unable to get AI response."});
     }
 
     // add history

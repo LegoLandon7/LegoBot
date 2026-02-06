@@ -1,6 +1,6 @@
-// ping.js -> ping command to get latency
+// ping.js -> Gets latency (slash)
 // Landon Lego
-// Last updated 1/31/2026
+// Last updated 2/6/2026
 
 // imports
 const { SlashCommandBuilder } = require('discord.js');
@@ -10,11 +10,11 @@ const data = new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Replies with Pong!');
 
-// execute data
-async function execute(interaction) {
-    const sent = await message.reply('Pinging...');
-    const ping = sent.createdTimestamp - message.createdTimestamp;
-    await interaction.reply({content: `🏓 Pong!\n\nLatency: ${ping}ms\nAPI: ${client.ws.ping}ms`});
+// execute command
+async function execute(interaction, client) {
+    const sent = await interaction.reply({ content: '⏱️ Measuring...' });
+    const ping = sent.createdTimestamp - interaction.createdTimestamp;
+    await interaction.editReply({ content: `🏓 Pong!\n\n**Latency:** ${ping}ms\n**API:** ${client.ws.ping}ms` });
 }
 
 // exports

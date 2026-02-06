@@ -1,4 +1,4 @@
-// deploy.js -> deploy commands to the bot
+// deploy-commands.js -> Deploy slash commands to bot
 // Landon Lego
 // Last updated 1/31/2026
 

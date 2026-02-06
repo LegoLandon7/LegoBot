@@ -1,6 +1,6 @@
-// setnick.js ->  Changes the nickname of a user
+// setnick.js -> Changes nickname of user (slash)
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // imports
 const { PermissionFlagsBits } = require('discord.js');
@@ -20,11 +20,11 @@ function data(subcommand) {
                 .setRequired(false))
         .addStringOption(o =>
             o.setName('reason')
-                .setDescription('The reason the user is timed out')
+                .setDescription('The reason the nickname is changed')
                 .setRequired(false))
         .addBooleanOption(o =>
-            o.setName('ephermeral')
-                .setDescription('Hide the confiirmation message')
+            o.setName('ephemeral')
+                .setDescription('Hide the confirmation message')
                 .setRequired(false));
 }
 
@@ -52,9 +52,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ManageNicknames))
-        return interaction.editReply({ content: "❌ You need the `Manage Nicknames` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Manage Nicknames` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ManageNicknames))
-        return interaction.editReply({ content: "❌ I don’t have the `Manage Nicknames` permission."});
+        return interaction.editReply({ content: "⚠️ I don't have the `Manage Nicknames` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -72,19 +72,18 @@ async function execute(interaction) {
     
     // change the nickname of the user
     try {
-        // dm
-        await targetUser.send(`🔤 Your nickname has been changed in **${interaction.guild.name}**\nnew nickname: **${newNick ? newNick : targetUser.tag}**\nreason: ${reason}`)
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send(`✅ Your nickname has been changed in **${interaction.guild.name}**\nNew Nickname: **${newNick ? newNick : targetUser.tag}**\nReason: ${reason}`)
+            .catch(() => console.log(`[ERROR] [SETNICK] Could not DM ${targetUser.tag}`));
 
-        // change nickname
+        // execute nickname change
         await targetMember.setNickname(newNick, reason);
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully changed the nickname of **${targetUser.tag}** to **${newNick ? newNick : targetUser.tag}**`});
     } catch (error) {
-        // unable to change nickname
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [SETNICK] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to change nickname."});
     }
 }
 

@@ -1,6 +1,6 @@
-// index.js -> prefixes main command
+// prefix.js -> Prefix command (slash)
 // Landon Lego
-// Last updated 2/5/2026
+// Last updated 2/6/2026
 
 // imports
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
@@ -14,9 +14,9 @@ const subcommandFiles = fs.readdirSync(subcommandsPath).filter(file => file.ends
 
 // command builder
 const data = new SlashCommandBuilder()
-    .setName('prefixes')
-    .setDescription('Prefix commands')
-    .setContexts(0); // guild only
+    .setName('prefix')
+    .setDescription('Manage custom server prefixes')
+    .setContexts(0);
 
 // register subcommands
 for (const file of subcommandFiles) {
@@ -38,25 +38,24 @@ async function execute(interaction) {
     const subcommandName = interaction.options.getSubcommand();
     const subcommand = subcommands.get(subcommandName);
 
-    // invalid subcommand
+    // validate subcommand
     if (!subcommand) {
-        return interaction.reply('❌ Subcommand not found!');
+        return interaction.reply({ content: '✗ Subcommand not found!', flags: 64 });
     }
 
     // execute subcommand
     try {
         await subcommand.execute(interaction);
     } catch (error) {
-        console.error(error);
-        
-        // error
+        console.error('[ERROR]', error);
+        const errorContent = { content: '✗ An error occurred executing this command', flags: 64 };
         if (interaction.deferred || interaction.replied) {
-            await interaction.editReply('❌ Sorry, something went wrong!');
+            await interaction.editReply(errorContent);
         } else {
-            await interaction.reply('❌ Sorry, something went wrong!');
+            await interaction.reply(errorContent);
         }
     }
 }
 
 // exports
-module.exports = { data, execute, cooldown: 0};
+module.exports = { data, execute, cooldown: 0 };

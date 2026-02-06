@@ -1,6 +1,6 @@
-// ping.js ->  Gets latency
+// ping.js -> Gets latency (prefix)
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // execute command
 async function execute(client, message, args) {

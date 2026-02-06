@@ -1,4 +1,4 @@
-// untimeout.js ->  Removes timeout from a user
+// untimeout.js -> Removes timeout from user (slash)
 // Landon Lego
 // Last updated 2/4/2026
 
@@ -47,9 +47,9 @@ async function execute(interaction) {
 
     // permissions
     if (!commandMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "❌ You need the `Moderate Members` permission."});
+        return interaction.editReply({ content: "⚠️ You need the `Moderate Members` permission."});
     if (!botMember.permissions.has(PermissionFlagsBits.ModerateMembers))
-        return interaction.editReply({ content: "❌ I don’t have the `Moderate Members` permission."});
+        return interaction.editReply({ content: "⚠️ I don't have the `Moderate Members` permission."});
 
     // check if in guild
     if (!targetMember)
@@ -63,25 +63,24 @@ async function execute(interaction) {
 
     // self checks
     if (targetUser.id === botUser.id)
-        return interaction.editReply({ content: "❌ Cannot kick myself."});
+        return interaction.editReply({ content: "⚠️ Cannot remove timeout from myself."});
     if (commandUser.id === targetUser.id)
-        return interaction.editReply({ content: "❌ Cannot kick yourself."});
+        return interaction.editReply({ content: "⚠️ Cannot remove timeout from yourself."});
     
     // removes timeout from the user
     try {
-        // dm
-        await targetUser.send(`⏳ Your timeout has been removed from **${interaction.guild.name}**\nreason: ${reason}`)
-            .catch(() => console.log(`⚠️ Could not DM ${targetUser.tag}`));
+        // send DM
+        await targetUser.send(`⏱️ Your timeout has been removed from **${interaction.guild.name}**\nReason: ${reason}`)
+            .catch(() => console.log(`[ERROR] [UNTIMEOUT] Could not DM ${targetUser.tag}`));
 
         // remove timeout
         await targetMember.disableCommunicationUntil(null, reason);
 
-        // confirmation
+        // success reply
         return interaction.editReply({ content: `✅ Successfully removed timeout from **${targetUser.tag}**`});
     } catch (error) {
-        // unable to remove timeout
-        console.error(`[ERROR] [MODERATION] ${error}`);
-        throw error;
+        console.error(`[ERROR] [UNTIMEOUT] - ${error}`);
+        return interaction.editReply({ content: "✕ Unable to remove timeout."});
     }
 }
 

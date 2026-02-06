@@ -1,4 +1,4 @@
-// ai-model.js -> the main ai model
+// ai-model.js -> Main AI model
 // Landon Lego
 // Last updated 1/31/2026
 

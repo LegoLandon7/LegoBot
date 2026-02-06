@@ -1,6 +1,6 @@
-// time.js -> utility for time-related functions
+// time.js -> Time utility functions
 // Landon Lego
-// Last updated 2/4/2026
+// Last updated 2/6/2026
 
 // data
 const units = [
@@ -14,10 +14,11 @@ const units = [
 
 // check values
 function isMsValue(value) {
-    return typeof value === "number";
+    return typeof value === 'number';
 }
+
 function isDuration(value) {
-    return typeof value === "string";
+    return typeof value === 'string';
 }
 
 // ms -> string format
