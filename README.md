@@ -13,7 +13,7 @@ Official website: [https://llegonetwork.dev](https://llegonetwork.dev/projects/L
 
 - Fully functional Discord bot powered by **discord.js**
 - SQLite database support with **better-sqlite3**
-- GROQ SDK integration for database queries
+- GROQ SDK integration for ai responses
 - Easy to deploy and run
 
 ---
