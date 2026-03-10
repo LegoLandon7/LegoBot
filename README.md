@@ -3,7 +3,7 @@
 A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 
 - [Support Server](https://discord.gg/example)
-- [Bots Documentation](llegonetwork.dev/projects/LegoBot)
+- [Bots Documentation](https://llegonetwork.dev/projects/LegoBot)
 
 ---
 
