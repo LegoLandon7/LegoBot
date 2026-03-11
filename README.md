@@ -9,9 +9,9 @@ A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 
 ## Features
 
-- Fast and lightweight
-- Easy to configure
-- Built with TypeScript for reliability
+- Moderation Commands
+- Logging
+- Fun Commands
 - Actively maintained by llegonetwork
 
 ---
@@ -28,7 +28,7 @@ A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/llegonetwork/legobot.git
+   git clone https://github.com/LegoLandon7/LegoBot.git
    cd legobot
    ```
 
