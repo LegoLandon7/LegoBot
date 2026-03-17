@@ -1,31 +1,28 @@
 {
   "name": "legobot",
   "version": "1.0.0",
-  "description": "A muiltifunctional discord bot",
-  "main": "index.js",
+  "description": "A multifunctional discord bot",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "start": "node src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LegoLandon7/LegoBot.git"
   },
-  "keywords": [],
+  "homepage": "https://github.com/LegoLandon7/LegoBot",
   "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/LegoLandon7/LegoBot/issues"
-  },
-  "homepage": "https://github.com/LegoLandon7/LegoBot#readme",
-  "devDependencies": {
-    "@types/node": "^25.5.0",
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.3.1",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  }
+  "license": "ISC"
 }
