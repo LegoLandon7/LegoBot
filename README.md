@@ -35,7 +35,7 @@ A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 2. Install dependencies
 
    ```bash
-   npm install
+   npm install -D typescript @types/node discord.js dotenv
    ```
 
 3. Create a `.env` file in the root of the project
@@ -53,15 +53,6 @@ A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
    npm run build
    npm start
    ```
-
----
-
-## Configuration
-
-| Variable | Description |
-|----------|-------------|
-| `BOT_TOKEN` | Your Discord bot token from the Developer Portal |
-| `CLIENT_ID` | Your bot's application/client ID |
 
 ---
 

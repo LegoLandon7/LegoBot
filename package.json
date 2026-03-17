@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsx watch src/index.ts",
-    "start": "node dist/index.js",
+    "start": "node src/index.ts",
     "build": "tsc"
   },
   "repository": {
@@ -21,12 +21,10 @@
     "url": "https://github.com/LegoLandon7/LegoBot/issues"
   },
   "homepage": "https://github.com/LegoLandon7/LegoBot#readme",
-  "dependencies": {
-    "discord.js": "^14.25.1",
-    "dotenv": "^17.3.1"
-  },
   "devDependencies": {
-    "@types/node": "^25.4.0",
+    "@types/node": "^25.5.0",
+    "discord.js": "^14.25.1",
+    "dotenv": "^17.3.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
