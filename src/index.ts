@@ -1,5 +1,9 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, Collection } from 'discord.js';
 import * as dotenv from 'dotenv';
+import { loadEvents } from './handlers/eventHandler.js';
+import { loadCommands } from './load/commandLoader.js';
+import { deployCommands } from './deploy/deployCommands.js';
+import type { Command } from './types/commands.js';
 
 dotenv.config();
 
@@ -9,10 +13,13 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
     ]
-});
+}) as Client & { commands: Collection<string, Command> };
 
-client.once('clientReady', () => {
-    console.log(`✅ Logged in as ${client.user?.tag}`);
-});
+client.commands = new Collection();
 
-client.login(process.env.BOT_TOKEN);
+loadEvents(client);
+
+await loadCommands(client);
+await deployCommands(client);
+
+client.login(process.env.DISCORD_TOKEN);

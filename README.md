@@ -2,7 +2,7 @@
 
 A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 
-- [Support Server](https://discord.gg/example)
+- [Support Server](https://discord.gg/ghHCxWxDMG)
 - [Bots Documentation](https://llegonetwork.dev/projects/LegoBot)
 
 ---
@@ -60,7 +60,7 @@ A multifunctional Discord bot built by [llegonetwork](llegonetwork.dev/).
 
 Need help? We've got you covered:
 
-- **Support server:** [discord.gg/example](https://discord.gg/example)
+- **Support server:** [llegonetwork](https://discord.gg/ghHCxWxDMG)
 - **Contact the developer directly:** `legomaster_01` on Discord
 
 Please check the support server first; your question may already be answered there.
