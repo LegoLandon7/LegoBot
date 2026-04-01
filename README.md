@@ -73,13 +73,12 @@ Contributions are welcome. Feel free to open an issue or submit a pull request.
 
 ---
 
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
 ## Legal
 
-- [Terms of Service](https://llegonetwork.dev/terms-of-service)
-- [Privacy Policy](https://llegonetwork.dev/privacy-policy)
+This project is licensed under the MIT License.
+
+By using this product or using our code you agree and have read the following:
+
+- [Terms of Service](https://llegonetwork.dev/terms)
+- [Privacy Policy](https://llegonetwork.dev/privacy)
+- [LICENSE](LICENSE)
